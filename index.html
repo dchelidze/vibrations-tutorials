@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vibrations &amp; Dynamics Interactive Tutorials — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --navy: #132433;
+      --paper: #f7f6f2;
+      --surface: #ffffff;
+      --copper: #b4622a;
+      --copper-deep: #9a5323;
+      --copper-light: #d98a52;
+      --muted: #5b6168;
+      --muted-on-navy: #a9b6bf;
+      --hairline: #dcd9d2;
+      --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: 'IBM Plex Serif', Georgia, serif;
+      --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--paper);
+      color: var(--navy);
+      font-family: var(--font-serif);
+      line-height: 1.62;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .hero {
+      background: var(--navy);
+      color: #ffffff;
+      border-bottom: 4px solid var(--copper);
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .hero-inner {
+      padding: 44px 24px 38px;
+    }
+
+    .eyebrow {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--copper-light);
+      margin-bottom: 10px;
+    }
+
+    .copper-bar {
+      width: 44px;
+      height: 4px;
+      background: var(--copper-light);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-family: var(--font-sans);
+      font-size: clamp(1.75rem, 3vw, 2.4rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.18;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 72ch;
+      color: var(--muted-on-navy);
+      font-size: 16px;
+    }
+
+    main {
+      flex: 1;
+      padding: 42px 0 64px;
+    }
+
+    .section-head {
+      margin-bottom: 22px;
+    }
+
+    .section-head .copper-bar {
+      background: var(--copper);
+      width: 36px;
+      margin-bottom: 8px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-family: var(--font-sans);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-top: 3px solid var(--navy);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s;
+    }
+
+    .card:hover {
+      border-color: var(--navy);
+      border-top-color: var(--copper);
+    }
+
+    .card-thumb {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      object-position: top center;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--navy);
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .card-kicker {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--copper-deep);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-family: var(--font-sans);
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14.5px;
+      color: var(--muted);
+    }
+
+    .card-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--copper-deep);
+      background: var(--paper);
+    }
+
+    .card-meta {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    footer {
+      background: var(--navy);
+      color: var(--muted-on-navy);
+      border-top: 4px solid var(--copper);
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+    }
+
+    .footer-inner {
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--copper-light);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · University of Rhode Island</div>
+      <div class="copper-bar"></div>
+      <h1>Vibrations and dynamics interactive tutorials</h1>
+      <p class="lead">
+        Interactive geometric visualizations for undergraduate and graduate coursework in mechanical vibrations,
+        modal analysis, and nonlinear dynamics. Created by David Chelidze, Department of Mechanical, Industrial
+        and Systems Engineering.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="section-head">
+        <div class="copper-bar"></div>
+        <h2>Available modules</h2>
+      </div>
+
+      <div class="tutorial-grid">
+        <a class="card" href="./2dof-modal-geometry/">
+          <img
+            class="card-thumb"
+            src="./wordpress/2dof-modal-geometry-preview.jpg"
+            alt="Preview of 2-DOF oscillations and modal geometry tutorial"
+          />
+          <div class="card-body">
+            <span class="card-kicker">Module 01 · Linear 2-DOF Systems</span>
+            <h3>From coupled energy ellipses to linear normal modes</h3>
+            <p>
+              Explore spring-mass pendulum, double pendulum, and coupled mass systems. Visualize kinetic and
+              potential energy bowls, ellipse tangency, the symmetric mass-weighted stiffness ellipse, simultaneous
+              diagonalization, and modal superposition.
+            </p>
+          </div>
+          <div class="card-footer">
+            <span>Open interactive tutorial</span>
+            <span class="card-meta">/2dof-modal-geometry/</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>
+        &copy; 2026 <a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Courseware hub · Hosted on GitHub Pages</span>
+    </div>
+  </footer>
+</body>
+</html>

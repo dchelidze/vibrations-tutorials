@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2-DOF Oscillations &amp; Modal Geometry — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations & Dynamics tutorials">
+        <div class="brand-mark">$\omega$</div>
+        <div>
+          <span class="brand-title">2-DOF oscillations &amp; modal geometry</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-system">1. System</a>
+        <a href="#sec-energy">2. Energy</a>
+        <a href="#sec-tangency">3. Tangency</a>
+        <a href="#sec-morph">4. Morph</a>
+        <a href="#sec-modal">5. Superposition</a>
+        <a href="#sec-summary">6. Recipe</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-params" class="btn-nav" type="button" title="Adjust physical parameters live">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <circle cx="9" cy="7" r="2.2" fill="#132433"></circle>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+            <circle cx="15" cy="17" r="2.2" fill="#132433"></circle>
+          </svg>
+          <span>Parameters</span>
+        </button>
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING PARAMETERS DRAWER ===================== -->
+  <aside id="param-drawer" class="param-drawer" aria-label="Physical parameters">
+    <div class="drawer-header">
+      <h3 id="drawer-sys-title">System parameters</h3>
+      <button id="btn-close-drawer" class="btn btn-sm" type="button" aria-label="Close parameters">Close</button>
+    </div>
+    <div id="param-sliders-container"></div>
+    <div class="preset-chips" id="param-presets-container"></div>
+  </aside>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework</div>
+      <div class="copper-bar"></div>
+      <h1>From coupled energy ellipses to linear normal modes</h1>
+      <p class="hero-lead">
+        In a general two-degree-of-freedom mechanical system—such as a pendulum hanging from a spring-mounted cart
+        or a double pendulum—the <span class="c-mass-hero">mass matrix $\mathbf{M}$</span> and/or the
+        <span class="c-stiff-hero">stiffness matrix $\mathbf{K}$</span> are non-diagonal. We show geometrically how
+        their elliptical energy surfaces combine through the generalized eigenvalue problem
+        $\mathbf{K}\mathbf{u} = \omega^2\mathbf{M}\mathbf{u}$ to yield the natural frequencies and uncoupled linear
+        normal modes.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="system-selector" role="tablist" aria-label="Select 2-DOF mechanical system">
+          <button class="pill active" data-sys="spring-pendulum" type="button">Spring-mass + pendulum</button>
+          <button class="pill" data-sys="double-pendulum" type="button">Double pendulum</button>
+          <button class="pill" data-sys="coupled-masses" type="button">Coupled 2-mass springs</button>
+        </div>
+        <p class="system-desc-inline" id="system-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: MEET THE COUPLED 2-DOF SYSTEM
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-system">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Physical motion &amp; coupling</span>
+        <h2>1. Physical coordinates look coupled while modal coordinates oscillate purely</h2>
+        <p>
+          Compare a single normal mode against a general pluck below. In physical coordinates $(q_1, q_2)$, energy
+          transfers back and forth irregularly. Inside that same response sit two independent harmonic coordinates
+          <span class="c-mode1">$\eta_1(t)$</span> and <span class="c-mode2">$\eta_2(t)$</span> oscillating at the
+          natural frequencies <span class="c-mode1">$\omega_1$</span> and <span class="c-mode2">$\omega_2$</span>.
+        </p>
+      </div>
+
+      <div class="grid-main-side">
+        <div class="card">
+          <div class="canvas-box h-sim">
+            <canvas id="hero-sim-canvas"></canvas>
+          </div>
+          <div class="controls-row">
+            <div class="controls-group" id="hero-preset-btns">
+              <button class="btn btn-sm btn-mode1" data-hero-preset="mode1" type="button">Pure mode 1 ($\omega_1$)</button>
+              <button class="btn btn-sm btn-mode2" data-hero-preset="mode2" type="button">Pure mode 2 ($\omega_2$)</button>
+              <button class="btn btn-sm is-active" data-hero-preset="superposition" type="button">Superposition</button>
+              <button class="btn btn-sm" data-hero-preset="pluck1" type="button">Pluck $q_1$ only</button>
+            </div>
+            <div class="controls-group">
+              <button id="btn-hero-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+              <button id="btn-hero-open-params" class="btn btn-sm" type="button">Tune $\mathbf{M}, \mathbf{K}$</button>
+            </div>
+          </div>
+
+          <div class="canvas-box h-wave" style="margin-top: 12px;">
+            <canvas id="hero-wave-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 8px; font-size: 16px;">Linearized equations of motion</h3>
+          <p style="margin: 0 0 8px; font-size: 14px; color: var(--text-muted);">
+            Applying Lagrange’s equations to kinetic energy
+            <span class="c-mass">$T = \tfrac{1}{2}\dot{\mathbf{q}}^{\mathsf{T}} \mathbf{M}\dot{\mathbf{q}}$</span> and
+            potential energy <span class="c-stiff">$V = \tfrac{1}{2}\mathbf{q}^{\mathsf{T}} \mathbf{K}\mathbf{q}$</span> yields:
+          </p>
+
+          <div class="eq-box">
+            $$\mathbf{M}\ddot{\mathbf{q}} + \mathbf{K}\mathbf{q} = \mathbf{0} \quad \Longrightarrow \quad (\mathbf{K} - \omega^2\mathbf{M})\mathbf{u} = \mathbf{0}$$
+          </div>
+          <p style="margin: 0 0 8px; font-size: 12.5px; color: var(--text-muted);">
+            <strong>Linear limit:</strong> valid for small oscillations about static equilibrium ($\sin\theta \approx \theta$,
+            $\cos\theta \approx 1 - \theta^2/2$). At finite amplitudes, geometric nonlinearity introduces frequency-energy
+            dependence and curved nonlinear normal modes.
+          </p>
+
+          <div class="energy-tex-list" id="energy-formulas-live"></div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0;">
+            <div class="tex-mat-card is-mass" id="live-mat-M"></div>
+            <div class="tex-mat-card is-stiff" id="live-mat-K"></div>
+          </div>
+          <div style="display: flex; justify-content: center; margin: 8px 0;">
+            <div class="tex-mat-card" id="live-mat-MK"></div>
+          </div>
+
+          <div class="callout" id="coupling-callout"></div>
+
+          <div class="kpi-grid">
+            <div class="kpi kpi-m1">
+              <div class="kpi-label">Natural mode 1</div>
+              <div class="kpi-val c-mode1" id="kpi-w1"></div>
+              <div class="kpi-sub" id="kpi-f1"></div>
+              <div class="kpi-sub" id="kpi-u1"></div>
+            </div>
+            <div class="kpi kpi-m2">
+              <div class="kpi-label">Natural mode 2</div>
+              <div class="kpi-val c-mode2" id="kpi-w2"></div>
+              <div class="kpi-sub" id="kpi-f2"></div>
+              <div class="kpi-sub" id="kpi-u2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: ENERGY SURFACES — 3D PARABOLOIDS & 2D ELLIPSES
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-energy">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Geometric picture of $\mathbf{M}$ and $\mathbf{K}$</span>
+        <h2>2. Two matrices define two elliptical energy surfaces</h2>
+        <p>
+          Because <span class="c-mass">$\mathbf{M}$</span> and <span class="c-stiff">$\mathbf{K}$</span> are
+          symmetric positive-definite, kinetic energy
+          <span class="c-mass">$T(\dot{\mathbf{q}}) = \tfrac{1}{2}\dot{\mathbf{q}}^{\mathsf{T}}\mathbf{M}\dot{\mathbf{q}}$</span>
+          and potential energy
+          <span class="c-stiff">$V(\mathbf{q}) = \tfrac{1}{2}\mathbf{q}^{\mathsf{T}}\mathbf{K}\mathbf{q}$</span>
+          form three-dimensional parabolic energy bowls. Slicing each bowl at constant energy $E_0$ produces an
+          ellipse. Off-diagonal coupling tilts each ellipse away from the coordinate axes, and in general the two
+          ellipses do not share principal axes.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 14px;">
+          <div class="pill-group" id="energy-view-pills">
+            <button class="pill active" data-eview="both" type="button">Overlay $\mathbf{M}$ &amp; $\mathbf{K}$</button>
+            <button class="pill" data-eview="mass" type="button">Mass bowl $T(\dot{\mathbf{q}})$</button>
+            <button class="pill" data-eview="stiff" type="button">Stiffness bowl $V(\mathbf{q})$</button>
+          </div>
+
+          <div class="controls-group" style="flex: 1; max-width: 340px;">
+            <label for="energy-slice-slider" style="font-size: 12.5px; font-weight: 600; white-space: nowrap;">
+              Energy slice $E_0$:
+            </label>
+            <input id="energy-slice-slider" type="range" min="0.35" max="1.65" step="0.02" value="1.0" />
+            <button id="btn-energy-orbit" class="btn btn-sm" type="button">Pause orbit</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="canvas-box h-energy">
+            <canvas id="energy-3d-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-energy">
+            <canvas id="energy-2d-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="callout callout-stiff" style="margin-top: 14px;">
+          <strong>Why a single rotation cannot decouple the system.</strong>
+          Each ellipse has its own orthogonal principal axes (dashed lines). A pure rotation that aligns
+          <span class="c-mass">$\mathbf{M}$</span> leaves <span class="c-stiff">$\mathbf{K}$</span> tilted; rotating
+          to align <span class="c-stiff">$\mathbf{K}$</span> tilts <span class="c-mass">$\mathbf{M}$</span>.
+          Decoupling requires combining the geometry of both quadratic forms.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: HOW THE TWO ELLIPSES COMBINE (TANGENCY & RAYLEIGH QUOTIENT)
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-tangency">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Generalized eigenvalue geometry</span>
+        <h2>3. Tangency of the $\mathbf{M}$ and $\mathbf{K}$ ellipses determines $\omega_1$, $\omega_2$, and the normal modes</h2>
+        <p>
+          For harmonic motion $\mathbf{q}(t) = \mathbf{u}\cos(\omega t)$, the generalized eigenproblem
+          $\mathbf{K}\mathbf{u} = \lambda\mathbf{M}\mathbf{u}$ ($\lambda = \omega^2$) has two equivalent geometric
+          interpretations. Left: expanding the stiffness contour
+          <span class="c-stiff">$\mathbf{u}^{\mathsf{T}}\mathbf{K}\mathbf{u} = \lambda$</span> until it becomes
+          tangent to the fixed unit mass ellipse
+          <span class="c-mass">$\mathbf{u}^{\mathsf{T}}\mathbf{M}\mathbf{u} = 1$</span>—tangency occurs exclusively
+          at <span class="c-mode1">$\lambda = \omega_1^2$</span> and <span class="c-mode2">$\lambda = \omega_2^2$</span>.
+          Right: sweeping a direction $\mathbf{u}$ to locate where the elastic restoring force
+          <span class="c-stiff">$\mathbf{K}\mathbf{u}$</span> aligns with inertia
+          <span class="c-mass">$\mathbf{M}\mathbf{u}$</span> at the extrema of the Rayleigh quotient.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="canvas-box h-tang">
+            <canvas id="tangency-canvas"></canvas>
+          </div>
+
+          <div class="scrubber-bar">
+            <label for="lambda-slider">Sweep $\lambda = \omega^2$:</label>
+            <input id="lambda-slider" class="range-stiff" type="range" min="0" max="1" step="0.002" value="0.2" />
+            <span class="scrubber-val c-stiff" id="lambda-readout">—</span>
+          </div>
+
+          <div class="controls-row">
+            <div class="controls-group">
+              <button id="btn-tang-sweep" class="btn btn-sm btn-primary" type="button">Sweep $\lambda$</button>
+              <button id="btn-snap-m1" class="btn btn-sm btn-mode1" type="button">Snap to $\omega_1^2$</button>
+              <button id="btn-snap-m2" class="btn btn-sm btn-mode2" type="button">Snap to $\omega_2^2$</button>
+            </div>
+          </div>
+
+          <div class="callout callout-mode1">
+            <strong>Lagrange multiplier geometry.</strong>
+            Stationary values of <span class="c-stiff">$\mathbf{u}^{\mathsf{T}}\mathbf{K}\mathbf{u}$</span> subject to
+            <span class="c-mass">$\mathbf{u}^{\mathsf{T}}\mathbf{M}\mathbf{u} = 1$</span> occur where both ellipses
+            share a tangent line and parallel normal gradients:
+            $$\nabla(\mathbf{u}^{\mathsf{T}}\mathbf{K}\mathbf{u}) = \lambda\,\nabla(\mathbf{u}^{\mathsf{T}}\mathbf{M}\mathbf{u}) \iff \mathbf{K}\mathbf{u} = \lambda\mathbf{M}\mathbf{u}.$$
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="canvas-box h-tang">
+            <canvas id="rayleigh-canvas"></canvas>
+          </div>
+
+          <div class="controls-row">
+            <div class="controls-group">
+              <button id="btn-ray-play" class="btn btn-sm btn-primary" type="button">Pause sweep</button>
+              <button id="btn-ray-m1" class="btn btn-sm btn-mode1" type="button">Align $\mathbf{u}_1$</button>
+              <button id="btn-ray-m2" class="btn btn-sm btn-mode2" type="button">Align $\mathbf{u}_2$</button>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Synchronous oscillation and the Rayleigh quotient.</strong>
+            Along a general direction $\mathbf{u}$, the restoring vector
+            <span class="c-stiff">$\mathbf{K}\mathbf{u}$</span> is not parallel to
+            <span class="c-mass">$\mathbf{M}\mathbf{u}$</span>, pulling the motion off that line. Along
+            <span class="c-mode1">$\mathbf{u}_1$</span> or <span class="c-mode2">$\mathbf{u}_2$</span> they align,
+            and their ratio equals the Rayleigh quotient:
+            $$R(\mathbf{u}) = \frac{\mathbf{u}^{\mathsf{T}}\mathbf{K}\mathbf{u}}{\mathbf{u}^{\mathsf{T}}\mathbf{M}\mathbf{u}} = \omega^2.$$
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: M^(-1/2) K M^(-1/2) ELLIPSE & SIMULTANEOUS DIAGONALIZATION MORPH
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-morph">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Mass-weighted stiffness $\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$ &amp; modal coordinates</span>
+        <h2>4. Modal coordinates factor through the symmetric ellipse $\mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</h2>
+        <p>
+          To diagonalize both <span class="c-mass">$\mathbf{M}$</span> and <span class="c-stiff">$\mathbf{K}$</span>
+          simultaneously, introduce mass-weighted coordinates $\mathbf{z} = \mathbf{M}^{1/2}\mathbf{q}$ (so
+          $\mathbf{q} = \mathbf{M}^{-1/2}\mathbf{z}$) in $\mathbf{M}\ddot{\mathbf{q}} + \mathbf{K}\mathbf{q} = \mathbf{0}$
+          and left-multiply by $\mathbf{M}^{-1/2}$. The mass matrix becomes the identity
+          <span class="c-mass">$\mathbf{I}$</span> (a unit circle) and stiffness becomes the symmetric matrix
+          <span class="c-stiff">$\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</span>. Rotating
+          onto the orthogonal eigenvectors $\mathbf{P} = [\mathbf{p}_1\;\mathbf{p}_2]$ of $\tilde{\mathbf{K}}$ yields
+          modal coordinates $\boldsymbol{\eta} = \mathbf{P}^{\mathsf{T}}\mathbf{z}$, so
+          $\mathbf{q} = \mathbf{\Phi}\boldsymbol{\eta}$ with $\mathbf{\Phi} = \mathbf{M}^{-1/2}\mathbf{P}$.
+        </p>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 18px;">
+        <div class="card">
+          <div class="canvas-box h-ktilde">
+            <canvas id="ktilde-canvas"></canvas>
+          </div>
+          <div class="callout callout-stiff" style="margin-top: 12px;">
+            <strong>Reading the $\mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$ ellipse.</strong>
+            Because <span class="c-stiff">$\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</span>
+            is symmetric, the level set $\mathbf{z}^{\mathsf{T}}\tilde{\mathbf{K}}\mathbf{z} = 1$ has perpendicular
+            principal axes <span class="c-mode1">$\mathbf{p}_1$</span> $\perp$ <span class="c-mode2">$\mathbf{p}_2$</span>
+            with semi-axis lengths <span class="c-mode1">$a = 1/\omega_1$</span> and
+            <span class="c-mode2">$b = 1/\omega_2$</span>. Its aspect ratio $a/b = \omega_2/\omega_1$ directly measures
+            the natural frequency separation.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 8px; font-size: 16px;">Relation between $\mathbf{q} = \mathbf{\Phi}\boldsymbol{\eta}$ and $\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</h3>
+
+          <div class="eq-box">
+            $$\mathbf{q} \;\xrightarrow{\;\mathbf{z} = \mathbf{M}^{1/2}\mathbf{q}\;}\; \mathbf{z} \;\xrightarrow{\;\boldsymbol{\eta} = \mathbf{P}^{\mathsf{T}}\mathbf{z}\;}\; \boldsymbol{\eta} \qquad\Longleftrightarrow\qquad \mathbf{q} = \underbrace{\mathbf{M}^{-1/2}\mathbf{P}}_{\mathbf{\Phi}}\,\boldsymbol{\eta}$$
+          </div>
+
+          <div style="font-size: 14px; color: var(--text-muted); display: grid; gap: 7px; margin: 10px 0;">
+            <div>
+              <strong>Step 1 (mass-weighting).</strong> Setting $\mathbf{q} = \mathbf{M}^{-1/2}\mathbf{z}$ transforms
+              $\mathbf{M}\ddot{\mathbf{q}} + \mathbf{K}\mathbf{q} = \mathbf{0}$ into
+              $$\ddot{\mathbf{z}} + \tilde{\mathbf{K}}\mathbf{z} = \mathbf{0}, \qquad \tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2} = \tilde{\mathbf{K}}^{\mathsf{T}}.$$
+            </div>
+            <div>
+              <strong>Step 2 (orthogonal rotation).</strong> Solving the symmetric eigenproblem
+              $\tilde{\mathbf{K}}\mathbf{P} = \mathbf{P}\mathbf{\Lambda}$ with orthogonal
+              $\mathbf{P} = [\mathbf{p}_1\;\mathbf{p}_2]$ ($\mathbf{P}^{\mathsf{T}}\mathbf{P} = \mathbf{I}$) and
+              setting $\mathbf{z} = \mathbf{P}\boldsymbol{\eta}$ yields $\ddot{\boldsymbol{\eta}} + \mathbf{\Lambda}\boldsymbol{\eta} = \mathbf{0}$.
+            </div>
+            <div>
+              <strong>Combined modal matrix $\mathbf{\Phi}$.</strong> Chaining both steps gives
+              $\mathbf{q} = \mathbf{M}^{-1/2}\mathbf{P}\boldsymbol{\eta} = \mathbf{\Phi}\boldsymbol{\eta}$, which
+              satisfies $\mathbf{\Phi}^{\mathsf{T}}\mathbf{M}\mathbf{\Phi} = \mathbf{P}^{\mathsf{T}}\mathbf{P} = \mathbf{I}$
+              and $\mathbf{\Phi}^{\mathsf{T}}\mathbf{K}\mathbf{\Phi} = \mathbf{P}^{\mathsf{T}}\tilde{\mathbf{K}}\mathbf{P} = \mathbf{\Lambda}$.
+            </div>
+          </div>
+
+          <div class="card-subtle" style="margin-top: 10px;">
+            <div style="font-family: var(--font-sans); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px;">
+              Live symmetric $\tilde{\mathbf{K}}$ and modal factorization $\mathbf{\Phi} = \mathbf{M}^{-1/2}\mathbf{P}$
+            </div>
+            <div class="mat-chain">
+              <div class="tex-mat-card is-stiff" id="live-mat-KTilde"></div>
+            </div>
+            <div class="mat-chain" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
+              <div class="tex-mat-card is-plain" id="live-mat-PhiFactor"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-Stage Motion Graphic Stepper Header -->
+      <div class="stage-stepper" id="morph-stage-stepper">
+        <button class="stage-btn active" data-stage="0" type="button">
+          <div class="stage-num">Stage 0 · Physical space</div>
+          <div class="stage-title">Coupled coordinates $\mathbf{q}$</div>
+          <div class="stage-math">$\mathbf{M}, \mathbf{K}$ · skewed modes $\mathbf{u}_1, \mathbf{u}_2$</div>
+        </button>
+        <button class="stage-btn" data-stage="1" type="button">
+          <div class="stage-num">Stage 1 · Apply $\mathbf{M}^{1/2}$</div>
+          <div class="stage-title">$\mathbf{z} = \mathbf{M}^{1/2}\mathbf{q}$ (whiten $\mathbf{M}\to\mathbf{I}$)</div>
+          <div class="stage-math">$\mathbf{M} \to \mathbf{I},\; \mathbf{K} \to \tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</div>
+        </button>
+        <button class="stage-btn" data-stage="2" type="button">
+          <div class="stage-num">Stage 2 · Rotate by $\mathbf{P}^{\mathsf{T}}$</div>
+          <div class="stage-title">Modal space $\boldsymbol{\eta} = \mathbf{P}^{\mathsf{T}}\mathbf{z} = \mathbf{\Phi}^{-1}\mathbf{q}$</div>
+          <div class="stage-math">$\mathbf{\Phi}^{\mathsf{T}}\mathbf{M}\mathbf{\Phi} = \mathbf{I},\; \mathbf{\Phi}^{\mathsf{T}}\mathbf{K}\mathbf{\Phi} = \mathbf{\Lambda}$</div>
+        </button>
+      </div>
+
+      <div class="grid-main-side">
+        <div class="card">
+          <div class="canvas-box h-morph">
+            <canvas id="morph-canvas"></canvas>
+          </div>
+
+          <div class="scrubber-bar">
+            <label for="morph-scrubber">Transform progress $t$:</label>
+            <input id="morph-scrubber" type="range" min="0" max="2" step="0.005" value="0" />
+            <span class="scrubber-val" id="morph-t-readout">0.00</span>
+          </div>
+
+          <div class="controls-row">
+            <div class="controls-group">
+              <button id="btn-morph-play" class="btn btn-primary" type="button">Play morph</button>
+              <button id="btn-morph-reverse" class="btn btn-sm" type="button">Reverse ($\mathbf{q} = \mathbf{\Phi}\boldsymbol{\eta}$)</button>
+              <button id="btn-morph-reset" class="btn btn-sm" type="button">Reset</button>
+            </div>
+            <div class="controls-group">
+              <label class="checkbox-label">
+                <input id="chk-morph-grid" type="checkbox" checked /> Deformed grid
+              </label>
+              <label class="checkbox-label">
+                <input id="chk-morph-para" type="checkbox" checked /> Tangent box
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 6px; font-size: 16px;" id="morph-narration-title"></h3>
+          <p style="margin: 0 0 14px; font-size: 14px; color: var(--text-muted);" id="morph-narration-body"></p>
+
+          <div class="card-subtle" style="margin-bottom: 12px;">
+            <div style="font-family: var(--font-sans); font-size: 11.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;">
+              Live transformed matrices: $\mathbf{M}(t) = \mathbf{L}^{-\mathsf{T}}\mathbf{M}\mathbf{L}^{-1}$, $\;\mathbf{K}(t) = \mathbf{L}^{-\mathsf{T}}\mathbf{K}\mathbf{L}^{-1}$
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+              <div class="tex-mat-card is-mass" id="morph-mat-M"></div>
+              <div class="tex-mat-card is-stiff" id="morph-mat-K"></div>
+            </div>
+          </div>
+
+          <div class="card-subtle" style="margin-bottom: 12px;">
+            <div style="font-family: var(--font-sans); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;">
+              Modal orthogonality check
+            </div>
+            <div style="font-size: 13.5px; display: grid; gap: 5px;">
+              <div>Euclidean angle $\angle(\mathbf{u}_1, \mathbf{u}_2) =$ <strong id="morph-angle-now">—</strong></div>
+              <div>$\mathbf{M}$-inner product $\mathbf{u}_1^{\mathsf{T}}\mathbf{M}\mathbf{u}_2 =$ <strong class="c-mode1" id="morph-m-ortho">0.000</strong></div>
+              <div>$\mathbf{K}$-inner product $\mathbf{u}_1^{\mathsf{T}}\mathbf{K}\mathbf{u}_2 =$ <strong class="c-mode1" id="morph-k-ortho">0.000</strong></div>
+            </div>
+          </div>
+
+          <div class="callout callout-mode1">
+            <strong>Geometric interpretation of $\mathbf{q} = \mathbf{\Phi}\boldsymbol{\eta}$.</strong>
+            Use <em>Reverse ($\mathbf{q} = \mathbf{\Phi}\boldsymbol{\eta}$)</em> from Stage 2 back to Stage 0 to follow
+            $\mathbf{q} = \mathbf{M}^{-1/2}(\mathbf{P}\boldsymbol{\eta})$: rotating by $\mathbf{P}$ aligns with the
+            orthogonal axes of <span class="c-stiff">$\tilde{\mathbf{K}}$</span>, and stretching by
+            <span class="c-mass">$\mathbf{M}^{-1/2}$</span> maps those perpendicular axes onto the physical normal modes
+            <span class="c-mode1">$\mathbf{u}_1$</span> and <span class="c-mode2">$\mathbf{u}_2$</span>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: MODAL SUPERPOSITION STUDIO
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-modal">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Modal decomposition in action</span>
+        <h2>5. Every free vibration is a superposition of two independent modes</h2>
+        <p>
+          Under the modal transformation
+          $\mathbf{q}(t) = \mathbf{\Phi}\boldsymbol{\eta}(t) = \eta_1(t)\mathbf{u}_1 + \eta_2(t)\mathbf{u}_2$,
+          the coupled system separates into two independent scalar oscillators:
+          <span class="c-mode1">$\ddot{\eta}_1 + \omega_1^2\eta_1 = 0$</span> and
+          <span class="c-mode2">$\ddot{\eta}_2 + \omega_2^2\eta_2 = 0$</span>.
+          Compare the skewed Lissajous trajectory in physical coordinates $(q_1, q_2)$ with the axis-aligned
+          bounding rectangle in modal coordinates $(\eta_1, \eta_2)$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-3">
+          <div class="canvas-box h-mini"><canvas id="modal-m1-canvas"></canvas></div>
+          <div class="canvas-box h-mini"><canvas id="modal-m2-canvas"></canvas></div>
+          <div class="canvas-box h-mini"><canvas id="modal-total-canvas"></canvas></div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 14px;">
+          <div class="card-subtle">
+            <div class="param-row-head">
+              <span class="c-mode1">Mode 1 amplitude $A_1$</span>
+              <span class="param-val c-mode1" id="val-A1">0.65</span>
+            </div>
+            <input id="slider-A1" class="range-mode1" type="range" min="0" max="1.0" step="0.02" value="0.65" />
+          </div>
+          <div class="card-subtle">
+            <div class="param-row-head">
+              <span class="c-mode2">Mode 2 amplitude $A_2$</span>
+              <span class="param-val c-mode2" id="val-A2">0.55</span>
+            </div>
+            <input id="slider-A2" class="range-mode2" type="range" min="0" max="1.0" step="0.02" value="0.55" />
+          </div>
+          <div class="card-subtle">
+            <div class="param-row-head">
+              <span>Phase offset $\Delta\phi$</span>
+              <span class="param-val" id="val-phi2">0°</span>
+            </div>
+            <input id="slider-phi2" type="range" min="0" max="360" step="5" value="0" />
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button class="btn btn-sm btn-mode1" data-modal-preset="mode1" type="button">Pure mode 1</button>
+            <button class="btn btn-sm btn-mode2" data-modal-preset="mode2" type="button">Pure mode 2</button>
+            <button class="btn btn-sm" data-modal-preset="mix" type="button">50/50 mix</button>
+            <button class="btn btn-sm" data-modal-preset="pluck1" type="button">Pluck $q_1$ only</button>
+          </div>
+          <button id="btn-modal-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+        </div>
+
+        <div class="grid-2" style="margin-top: 14px;">
+          <div class="canvas-box h-traj"><canvas id="modal-phys-traj"></canvas></div>
+          <div class="canvas-box h-traj"><canvas id="modal-mod-traj"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: CLASSROOM SUMMARY & LIVE MATLAB / PYTHON VERIFICATION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Classroom recipe &amp; numerical verification</span>
+        <h2>6. Step-by-step modal analysis recipe</h2>
+        <p>
+          A concise five-step procedure for linear 2-DOF modal analysis, paired with MATLAB and Python (SciPy)
+          verification scripts populated with the current system matrices.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Five-step modal procedure</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Form $\mathbf{M}$ and $\mathbf{K}$ from energy.</strong> Write
+                $T = \tfrac{1}{2}\dot{\mathbf{q}}^{\mathsf{T}}\mathbf{M}\dot{\mathbf{q}}$ and
+                $V = \tfrac{1}{2}\mathbf{q}^{\mathsf{T}}\mathbf{K}\mathbf{q}$ to obtain the symmetric matrices
+                <span class="c-mass">$\mathbf{M}$</span> and <span class="c-stiff">$\mathbf{K}$</span>.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Mass-weight or solve directly.</strong> Form the symmetric matrix
+                $\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$ and solve
+                $\tilde{\mathbf{K}}\mathbf{P} = \mathbf{P}\mathbf{\Lambda}$ (equivalently solve
+                $\det(\mathbf{K} - \omega^2\mathbf{M}) = 0$) for <span class="c-mode1">$\omega_1^2$</span> and
+                <span class="c-mode2">$\omega_2^2$</span>.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Assemble mass-normalized modes $\mathbf{\Phi}$.</strong> Map the orthogonal eigenvectors back via
+                $\mathbf{\Phi} = \mathbf{M}^{-1/2}\mathbf{P} = [\mathbf{u}_1\;\mathbf{u}_2]$, which automatically
+                satisfies $\mathbf{u}_i^{\mathsf{T}}\mathbf{M}\mathbf{u}_i = 1$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Verify simultaneous diagonalization.</strong> The modal matrix guarantees
+                $\mathbf{\Phi}^{\mathsf{T}}\mathbf{M}\mathbf{\Phi} = \mathbf{I}$ and
+                $\mathbf{\Phi}^{\mathsf{T}}\mathbf{K}\mathbf{\Phi} = \mathbf{\Lambda} = \operatorname{diag}(\omega_1^2, \omega_2^2)$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Decouple and recombine.</strong> Project initial conditions via
+                $\boldsymbol{\eta}(0) = \mathbf{\Phi}^{\mathsf{T}}\mathbf{M}\mathbf{q}(0)$, solve each scalar oscillator
+                $\ddot{\eta}_i + \omega_i^2\eta_i = 0$, and reconstruct
+                $\mathbf{q}(t) = \mathbf{\Phi}\boldsymbol{\eta}(t)$.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 16px;">Verify current system in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (SciPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+
+          <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <div class="tex-mat-card" id="summary-mat-Phi"></div>
+            <div class="tex-mat-card is-stiff" id="summary-mat-Lam"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FULL-WIDTH NAVY FOOTER ===================== -->
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts (deferred so KaTeX finishes loading before init runs) -->
+  <script defer src="js/math2dof.js"></script>
+  <script defer src="js/systems.js"></script>
+  <script defer src="js/viz-hero.js"></script>
+  <script defer src="js/viz-energy3d.js"></script>
+  <script defer src="js/viz-tangency.js"></script>
+  <script defer src="js/viz-morph.js"></script>
+  <script defer src="js/viz-modal.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
