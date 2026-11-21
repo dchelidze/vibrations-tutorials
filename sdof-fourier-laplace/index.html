@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fourier &amp; Laplace Transforms in Vibration Analysis — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$H$</div>
+        <div>
+          <span class="brand-title">Fourier &amp; Laplace transforms in vibrations</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-sdof">1. 1-DOF</a>
+        <a href="#sec-splane">2. $s$-Plane</a>
+        <a href="#sec-conv">3. Convolution</a>
+        <a href="#sec-frf">4. FRF anatomy</a>
+        <a href="#sec-types">5. Six FRFs</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-params" class="btn-nav" type="button" title="Adjust 1-DOF parameters live">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <circle cx="9" cy="7" r="2.2" fill="#132433"></circle>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+            <circle cx="15" cy="17" r="2.2" fill="#132433"></circle>
+          </svg>
+          <span>Parameters</span>
+        </button>
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING PARAMETERS DRAWER ===================== -->
+  <aside id="param-drawer" class="param-drawer" aria-label="1-DOF physical parameters">
+    <div class="drawer-header">
+      <h3>1-DOF system parameters</h3>
+      <button id="btn-close-drawer" class="btn btn-sm" type="button" aria-label="Close parameters">Close</button>
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Mass $m$</span>
+        <span class="param-val" id="val-m">1.00 kg</span>
+      </div>
+      <input id="slider-m" type="range" min="0.2" max="5.0" step="0.05" value="1.0" />
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Stiffness $k$</span>
+        <span class="param-val" id="val-k">100 N/m</span>
+      </div>
+      <input id="slider-k" class="range-copper" type="range" min="10" max="400" step="2" value="100" />
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Damping ratio $\zeta$</span>
+        <span class="param-val" id="val-zeta">0.08 (c = 1.60 N·s/m)</span>
+      </div>
+      <input id="slider-zeta" class="range-teal" type="range" min="0" max="1.8" step="0.01" value="0.08" />
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Probe / drive ratio $r = \omega / \omega_{\mathrm{n}}$</span>
+        <span class="param-val" id="val-r">1.00</span>
+      </div>
+      <input id="slider-r" type="range" min="0.1" max="3.0" step="0.02" value="1.0" />
+    </div>
+
+    <div class="preset-chips" id="drawer-presets">
+      <button class="btn btn-sm" data-preset="light" type="button">Light ($\zeta=0.08$)</button>
+      <button class="btn btn-sm" data-preset="moderate" type="button">Moderate ($\zeta=0.25$)</button>
+      <button class="btn btn-sm" data-preset="critical" type="button">Critical ($\zeta=1.0$)</button>
+      <button class="btn btn-sm" data-preset="overdamped" type="button">Overdamped ($\zeta=1.4$)</button>
+      <button class="btn btn-sm" data-preset="undamped" type="button">Undamped ($\zeta=0$)</button>
+    </div>
+  </aside>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework</div>
+      <div class="copper-bar"></div>
+      <h1>Fourier and Laplace transforms in vibration analysis</h1>
+      <p class="hero-lead">
+        A single-degree-of-freedom damped oscillator connects three equivalent descriptions of linear dynamics:
+        the time-domain <span class="c-blue-hero">impulse response function $h(t)$</span>, the complex-plane
+        <span class="c-orange-hero">Laplace transfer function $H(s)$</span>, and the steady-state
+        <span class="c-teal-hero">Fourier frequency response function $H(\mathrm{i}\omega)$</span>. We show
+        geometrically how the Fourier transform emerges as the imaginary-axis slice $s = \mathrm{i}\omega$ of the
+        Laplace surface, why convergence depends on pole locations, and how differentiation and reciprocals produce
+        the six standard dimensional FRFs used in vibration testing.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select damping regime">
+          <button class="pill active" data-preset="light" type="button">Lightly damped</button>
+          <button class="pill" data-preset="moderate" type="button">Moderately damped</button>
+          <button class="pill" data-preset="critical" type="button">Critically damped</button>
+          <button class="pill" data-preset="overdamped" type="button">Overdamped</button>
+          <button class="pill" data-preset="undamped" type="button">Undamped limit</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: 1-DOF OSCILLATOR & THREE EQUIVALENT DESCRIPTIONS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-sdof">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Physical 1-DOF system</span>
+        <h2>1. One damped oscillator links time, Laplace, and frequency descriptions</h2>
+        <p>
+          For a linear mass-spring-damper system excited by an external force $f(t)$, Newton’s second law gives a
+          second-order constant-coefficient differential equation. Compare the impulse response $h(t)$, harmonic
+          forced response, step response, and free release below while adjusting $m$, $k$, and $\zeta$.
+        </p>
+      </div>
+
+      <div class="grid-main-side">
+        <div class="card">
+          <div class="canvas-box h-sim">
+            <canvas id="sdof-sim-canvas"></canvas>
+          </div>
+          <div class="controls-row">
+            <div class="controls-group" id="sdof-mode-btns">
+              <button class="btn btn-sm is-active" data-mode="impulse" type="button">Impulse $\delta(t) \to h(t)$</button>
+              <button class="btn btn-sm" data-mode="harmonic" type="button">Harmonic $F_0\cos(\omega t)$</button>
+              <button class="btn btn-sm" data-mode="step" type="button">Step $F_0 u(t)$</button>
+              <button class="btn btn-sm" data-mode="free" type="button">Free IC $(x_0, 0)$</button>
+            </div>
+            <div class="controls-group">
+              <button id="btn-sdof-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+              <button id="btn-sdof-reset" class="btn btn-sm" type="button">Reset $t=0$</button>
+              <button id="btn-sdof-params" class="btn btn-sm" type="button">Tune $m, k, \zeta$</button>
+            </div>
+          </div>
+
+          <div class="canvas-box h-wave" style="margin-top: 12px;">
+            <canvas id="sdof-wave-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 8px; font-size: 16px;">Governing equation and transform triad</h3>
+          <div class="eq-box">
+            $$m\ddot{x}(t) + c\dot{x}(t) + kx(t) = f(t)$$
+          </div>
+
+          <div class="eq-stack" id="live-triad-eqs"></div>
+
+          <p style="margin: 8px 0 0; font-size: 12.5px; color: var(--text-muted);">
+            <strong>Linear limit:</strong> valid for constant mass, linear spring stiffness $k$, and linear viscous
+            damping $c$. Nonlinear restoring forces introduce amplitude-dependent natural frequencies (backbone curves)
+            and break superposition, so a single amplitude-independent FRF no longer describes the system.
+          </p>
+
+          <div class="kpi-grid">
+            <div class="kpi kpi-blue">
+              <div class="kpi-label">Natural frequency</div>
+              <div class="kpi-val c-blue" id="kpi-wn"></div>
+              <div class="kpi-sub" id="kpi-fn"></div>
+            </div>
+            <div class="kpi kpi-teal">
+              <div class="kpi-label">Damping &amp; quality</div>
+              <div class="kpi-val c-teal" id="kpi-zeta"></div>
+              <div class="kpi-sub" id="kpi-wd"></div>
+            </div>
+            <div class="kpi kpi-crimson">
+              <div class="kpi-label">Laplace poles $p_{1,2}$</div>
+              <div class="kpi-val c-crimson" id="kpi-poles"></div>
+              <div class="kpi-sub" id="kpi-roc"></div>
+            </div>
+            <div class="kpi kpi-orange">
+              <div class="kpi-label">Static compliance &amp; peak</div>
+              <div class="kpi-val c-orange" id="kpi-static"></div>
+              <div class="kpi-sub" id="kpi-peak"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: HOW FOURIER & LAPLACE TRANSFORMS ARE RELATED (s-PLANE)
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-splane">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Complex $s$-plane geometry</span>
+        <h2>2. The Fourier transform is the imaginary-axis slice of the Laplace transform</h2>
+        <p>
+          Write the complex frequency as $s = \sigma + \mathrm{i}\omega$. Because
+          $\mathrm{e}^{-st} = \mathrm{e}^{-\sigma t}\mathrm{e}^{-\mathrm{i}\omega t}$, the unilateral Laplace
+          transform is the Fourier transform of the exponentially weighted causal signal $x(t)\mathrm{e}^{-\sigma t}u(t)$.
+          The real decay rate $\sigma$ provides a convergence factor that handles undamped or growing responses.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$\mathcal{L}\{h(t)\}(s) = \int_{0^-}^{\infty} h(t)\,\mathrm{e}^{-(\sigma + \mathrm{i}\omega)t}\,\mathrm{d}t
+            = \mathcal{F}\!\left\{h(t)\mathrm{e}^{-\sigma t}u(t)\right\}(\omega)
+            \quad\Longrightarrow\quad
+            H(\mathrm{i}\omega) = \left.H(s)\right|_{s = \mathrm{i}\omega}\;\text{when }\sigma = 0 \in \mathrm{ROC}$$
+        </div>
+
+        <div class="controls-row" style="margin-bottom: 12px;">
+          <div class="pill-group" id="splane-bottom-pills">
+            <button class="pill active" data-bmode="slice" type="button">Slice magnitude $|H(\sigma + \mathrm{i}\omega)|$</button>
+            <button class="pill" data-bmode="weighted" type="button">Weighted kernel $h(t)\mathrm{e}^{-\sigma t}$</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-slice-zero" class="btn btn-sm btn-primary" type="button">Snap to $\sigma = 0$ (Fourier)</button>
+            <button id="btn-splane-orbit" class="btn btn-sm" type="button">Auto-orbit 3D</button>
+            <button id="btn-splane-reset" class="btn btn-sm" type="button">Reset view</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="canvas-box h-splane3d">
+            <canvas id="splane-3d-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-splane2d">
+            <canvas id="splane-2d-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-sigma">Vertical slice plane $\operatorname{Re}(s) = \sigma$:</label>
+          <input id="slider-sigma" class="range-copper" type="range" min="-1.6" max="0.7" step="0.02" value="0.0" />
+          <span class="scrubber-val" id="val-sigma">$\sigma = 0.00\,\omega_{\mathrm{n}}$</span>
+          <span class="status-badge ok" id="badge-roc">Inside ROC</span>
+        </div>
+
+        <div class="callout" id="splane-callout"></div>
+
+        <div class="table-wrap">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Laplace transform $\mathcal{L}\{x(t)\} = X(s)$</th>
+                <th>Fourier transform $\mathcal{F}\{x(t)\} = X(\mathrm{i}\omega)$</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Domain &amp; kernel</strong></td>
+                <td>Complex $s$-plane ($s = \sigma + \mathrm{i}\omega$); damped sinusoids $\mathrm{e}^{-(\sigma+\mathrm{i}\omega)t}$</td>
+                <td>Imaginary axis ($s = \mathrm{i}\omega$, $\sigma = 0$); pure persistent sinusoids $\mathrm{e}^{-\mathrm{i}\omega t}$</td>
+              </tr>
+              <tr>
+                <td><strong>Convergence</strong></td>
+                <td>Converges in the right half-plane $\operatorname{Re}(s) &gt; \sigma_0$ (ROC); handles undamped ($\zeta=0$) and unstable poles</td>
+                <td>Requires $\sigma = 0$ inside ROC (strictly stable $\zeta &gt; 0$); undamped poles require generalized delta distributions</td>
+              </tr>
+              <tr>
+                <td><strong>Initial conditions</strong></td>
+                <td>Unilateral derivative rule $\mathcal{L}\{\ddot{x}\} = s^2 X(s) - s x(0^-) - \dot{x}(0^-)$ captures full transient + forced motion</td>
+                <td>Bilateral $(-\infty, \infty)$ rule $\mathcal{F}\{\ddot{x}\} = -\omega^2 X(\mathrm{i}\omega)$ assumes zero initial conditions or steady state</td>
+              </tr>
+              <tr>
+                <td><strong>Role in vibrations</strong></td>
+                <td>Poles, stability boundaries, decay rates ($-\zeta\omega_{\mathrm{n}}$), complete transient solutions, control design</td>
+                <td>Measurable steady-state FRFs, impact-hammer &amp; shaker modal testing, PSDs, and spectral filtering</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: IMPULSE RESPONSE, CONVOLUTION & TRANSFER FUNCTION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-conv">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Convolution theorem</span>
+        <h2>3. Time-domain convolution equals multiplication in the transform domain</h2>
+        <p>
+          Any causal force history $f(t)$ is a superposition of delayed impulses, so the zero-initial-condition response
+          is the Duhamel convolution integral of $f(t)$ with the impulse response $h(t)$. Transforming turns that
+          integral into pointwise algebraic multiplication by the transfer function $H(s)$ or FRF $H(\mathrm{i}\omega)$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$x(t) = (h * f)(t) = \int_{0}^{t} h(t - \tau)f(\tau)\,\mathrm{d}\tau
+            \quad\xleftrightarrow{\;\mathcal{L}\;}\quad
+            X(s) = H(s)F(s)
+            \quad\xleftrightarrow{\;\mathcal{F}\;}\quad
+            X(\mathrm{i}\omega) = H(\mathrm{i}\omega)F(\mathrm{i}\omega)$$
+        </div>
+
+        <div id="live-irf-formula" class="eq-stack"></div>
+
+        <div class="controls-row" style="margin-bottom: 12px;">
+          <div class="pill-group" id="conv-signal-pills">
+            <button class="pill active" data-sig="hammer" type="button">Impact hammer pulse</button>
+            <button class="pill" data-sig="rect" type="button">Rectangular pulse</button>
+            <button class="pill" data-sig="twotone" type="button">Two-tone burst</button>
+            <button class="pill" data-sig="chirp" type="button">Frequency chirp</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-conv-play" class="btn btn-sm btn-primary" type="button">Sweep $t$</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="canvas-box h-conv">
+            <canvas id="conv-time-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-conv">
+            <canvas id="conv-freq-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-conv-t">Evaluation time $t$:</label>
+          <input id="slider-conv-t" class="range-teal" type="range" min="0" max="1" step="0.004" value="0.38" />
+          <span class="scrubber-val" id="val-conv-t">t = 1.31 s</span>
+        </div>
+
+        <div class="callout callout-teal">
+          <strong>Physical filtering interpretation.</strong>
+          Select the <em>Two-tone burst</em> above: the input contains energy near both $\omega_{\mathrm{n}}$ and
+          $2.15\,\omega_{\mathrm{n}}$. Multiplying $|F(\mathrm{i}\omega)|$ by the resonant FRF $|H(\mathrm{i}\omega)|$
+          amplifies the component near $\omega_{\mathrm{n}}$ and strongly attenuates the higher-frequency tone—the
+          exact frequency-domain counterpart of the time-domain convolution integral.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: ANATOMY OF THE FREQUENCY RESPONSE FUNCTION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-frf">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Reading the FRF</span>
+        <h2>4. Reading stiffness, damping, and mass regions from the FRF</h2>
+        <p>
+          Evaluating $H(s)$ along $s = \mathrm{i}\omega$ yields the complex receptance
+          $\alpha(\mathrm{i}\omega) = \operatorname{Re}(\alpha) + \mathrm{i}\operatorname{Im}(\alpha) = |\alpha|\mathrm{e}^{\mathrm{i}\phi}$.
+          Drag the copper frequency probe directly on the Bode plot to track the response across the
+          stiffness-controlled ($\omega \ll \omega_{\mathrm{n}}$), damping-controlled ($\omega \approx \omega_{\mathrm{n}}$),
+          and mass-controlled ($\omega \gg \omega_{\mathrm{n}}$) regimes.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 12px;">
+          <div class="pill-group" id="frf-scale-pills">
+            <button class="pill active" data-scale="log" type="button">Log-log (dB)</button>
+            <button class="pill" data-scale="lin" type="button">Linear magnitude</button>
+          </div>
+          <div class="pill-group" id="frf-right-pills">
+            <button class="pill active" data-rmode="reim" type="button">Real &amp; Imaginary parts</button>
+            <button class="pill" data-rmode="nyquist" type="button">Nyquist (Argand) plot</button>
+          </div>
+          <label class="checkbox-label">
+            <input id="chk-frf-asym" type="checkbox" checked />
+            Show asymptotes &amp; $-3\;\text{dB}$ half-power band
+          </label>
+        </div>
+
+        <div class="grid-2">
+          <div class="canvas-box h-bode">
+            <canvas id="frf-bode-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-nyq">
+            <canvas id="frf-complex-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3" id="frf-probe-kpis">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Active probe frequency</div>
+            <div class="kpi-val c-blue" id="kpi-probe-w"></div>
+            <div class="kpi-sub" id="kpi-probe-regime"></div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Complex receptance $\alpha(\mathrm{i}\omega)$</div>
+            <div class="kpi-val c-orange" id="kpi-probe-mag"></div>
+            <div class="kpi-sub" id="kpi-probe-reim"></div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Half-power bandwidth ($\Delta\omega_{-3\,\mathrm{dB}}$)</div>
+            <div class="kpi-val c-teal" id="kpi-halfpower"></div>
+            <div class="kpi-sub" id="kpi-halfpower-sub"></div>
+          </div>
+        </div>
+
+        <div class="callout callout-blue">
+          <strong>Phase resonance vs. amplitude peak.</strong>
+          For viscous damping, the amplitude peak of receptance occurs at
+          $\omega_{\mathrm{r}} = \omega_{\mathrm{n}}\sqrt{1 - 2\zeta^2} &lt; \omega_{\mathrm{n}}$ (and vanishes for
+          $\zeta \ge 1/\sqrt{2}$), whereas the real part $\operatorname{Re}[\alpha(\mathrm{i}\omega)]$ crosses zero
+          and the phase hits $\phi = -90^\circ$ at $\omega = \omega_{\mathrm{n}}$ identically for all $\zeta &gt; 0$.
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: SIX TYPES OF FRFs & DIMENSIONALITY
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-types">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Dimensionality &amp; physical sensors</span>
+        <h2>5. Six frequency response functions: differentiation, reciprocals, and units</h2>
+        <p>
+          In the Fourier domain, time differentiation multiplies by $\mathrm{i}\omega$: velocity is
+          $V(\mathrm{i}\omega) = \mathrm{i}\omega X(\mathrm{i}\omega)$ and acceleration is
+          $\ddot{X}(\mathrm{i}\omega) = -\omega^2 X(\mathrm{i}\omega)$. Each factor of $\mathrm{i}\omega$ rotates the
+          log-log magnitude slope by $+20\;\text{dB/dec}$, shifts phase by $+90^\circ$, and changes physical units.
+          Inverting response-over-force ratios gives the three reciprocal impedance functions.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$\alpha(\mathrm{i}\omega) = \frac{X}{F}
+            \;\xrightarrow{\;\times\,\mathrm{i}\omega\;}\;
+            Y(\mathrm{i}\omega) = \frac{V}{F}
+            \;\xrightarrow{\;\times\,\mathrm{i}\omega\;}\;
+            A(\mathrm{i}\omega) = \frac{\ddot{X}}{F},
+            \qquad
+            Z_k = \frac{1}{\alpha},\quad
+            Z = \frac{1}{Y},\quad
+            M_{\mathrm{app}} = \frac{1}{A}$$
+        </div>
+
+        <div class="controls-row" style="margin-bottom: 12px;">
+          <div class="pill-group" id="types-group-pills">
+            <button class="pill active" data-group="direct" type="button">Direct FRFs ($\alpha, Y, A$)</button>
+            <button class="pill" data-group="reciprocal" type="button">Reciprocal FRFs ($Z_k, Z, M_{\mathrm{app}}$)</button>
+            <button class="pill" data-group="dimensionless" type="button">Dimensionless (DAF &amp; Transmissibility)</button>
+          </div>
+          <label class="checkbox-label">
+            <input id="chk-types-asym" type="checkbox" checked />
+            Show stiffness &amp; mass asymptotes for focused FRF
+          </label>
+        </div>
+
+        <div class="grid-2">
+          <div class="canvas-box h-types">
+            <canvas id="types-bode-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-types">
+            <canvas id="types-nyq-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="nld-table" id="frf-types-table">
+            <thead>
+              <tr>
+                <th>FRF name (click to focus)</th>
+                <th>Definition</th>
+                <th>Exact 1-DOF expression</th>
+                <th>SI units</th>
+                <th>Low / high-$\omega$ slopes</th>
+                <th>Value at probe $\omega$</th>
+              </tr>
+            </thead>
+            <tbody id="frf-types-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="callout" style="margin-top: 14px;">
+          <strong>Dimensional FRFs vs. dimensionless ratios.</strong>
+          The six functions above carry physical dimensions determined by the sensor and force transducer (e.g., an
+          impact-hammer test with a piezoelectric accelerometer directly measures <em>accelerance</em>
+          $A(\mathrm{i}\omega)$ in $\text{m/(s}^2\cdot\text{N)} = \text{kg}^{-1}$). Multiplying receptance by $k$
+          produces the dimensionless <em>dynamic amplification factor</em> $D(\mathrm{i}\omega) = k\alpha(\mathrm{i}\omega)$.
+          By contrast, base-excitation displacement transmissibility and force transmissibility share the dimensionless
+          transfer function $T(\mathrm{i}\omega) = \frac{1 + \mathrm{i}2\zeta r}{(1 - r^2) + \mathrm{i}2\zeta r}$,
+          whose numerator zero causes all damping curves to cross $|T| = 1$ at $r = \sqrt{2}$ (the isolation threshold).
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: WORKFLOW, CODE VERIFICATION & CITATION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Engineering workflow &amp; verification</span>
+        <h2>6. Step-by-step vibration workflow and reproducible code</h2>
+        <p>
+          Follow the five steps below to move cleanly between time, Laplace, and frequency descriptions, or copy the
+          live MATLAB and Python scripts populated with your current system parameters.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Analytical &amp; experimental checklist</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Form the Laplace transfer function.</strong> Take the unilateral Laplace transform of
+                $m\ddot{x} + c\dot{x} + kx = f(t)$ to separate the zero-state transfer function
+                $H(s) = (ms^2 + cs + k)^{-1}$ from the initial-condition transient terms.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Inspect poles and the ROC.</strong> Compute $p_{1,2} = -\zeta\omega_{\mathrm{n}} \pm \mathrm{i}\omega_{\mathrm{d}}$.
+                Confirm $\operatorname{Re}(p_{1,2}) &lt; 0$ so the imaginary axis $s = \mathrm{i}\omega$ lies inside the ROC.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Restrict to $s = \mathrm{i}\omega$ for steady-state FRFs.</strong> Evaluate
+                $\alpha(\mathrm{i}\omega) = H(\mathrm{i}\omega)$ to obtain Bode magnitude/phase, quadrature peaks, and
+                steady-state harmonic response $X(\mathrm{i}\omega) = \alpha(\mathrm{i}\omega)F(\mathrm{i}\omega)$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Match the FRF type to your sensor.</strong> Accelerometers yield $A(\mathrm{i}\omega)$,
+                vibrometers yield $Y(\mathrm{i}\omega)$, and displacement probes yield $\alpha(\mathrm{i}\omega)$.
+                Convert between them using factors of $\mathrm{i}\omega$ and track SI units explicitly.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Identify modal parameters.</strong> Read $\omega_{\mathrm{n}}$ from the $\operatorname{Re}(\alpha) = 0$
+                crossing or mobility peak, extract $\zeta$ from the $-3\;\text{dB}$ half-power bandwidth or mobility
+                Nyquist circle diameter $1/c$, and verify asymptotes ($1/k$ and $1/m$).
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 16px;">Verify current 1-DOF system in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (SciPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FULL-WIDTH NAVY FOOTER ===================== -->
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script defer src="js/math1dof.js"></script>
+  <script defer src="js/viz-sdof.js"></script>
+  <script defer src="js/viz-splane.js"></script>
+  <script defer src="js/viz-convolution.js"></script>
+  <script defer src="js/viz-frf.js"></script>
+  <script defer src="js/viz-frf-types.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>

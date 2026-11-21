@@ -263,6 +263,50 @@
             <span class="card-meta">/2dof-modal-geometry/</span>
           </div>
         </a>
+
+        <a class="card" href="./sdof-fourier-laplace/">
+          <div
+            class="card-thumb"
+            style="display:flex;align-items:center;justify-content:center;padding:18px;background:#132433;"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 320 180" width="100%" height="100%" style="max-height:100%;">
+              <!-- Subtle s-plane grid -->
+              <line x1="28" y1="90" x2="292" y2="90" stroke="rgba(169,182,191,0.35)" stroke-width="1" />
+              <line x1="172" y1="18" x2="172" y2="162" stroke="#26b5a6" stroke-width="2" />
+              <!-- ROC shading -->
+              <rect x="122" y="18" width="170" height="144" fill="rgba(38,181,166,0.11)" />
+              <line x1="122" y1="18" x2="122" y2="162" stroke="#f0657f" stroke-width="1.2" stroke-dasharray="4 3" />
+              <!-- Semicircle |s| = wn -->
+              <path d="M 172 34 A 56 56 0 0 0 172 146" fill="none" stroke="rgba(169,182,191,0.4)" stroke-width="1.2" stroke-dasharray="3 3" />
+              <!-- Complex conjugate poles -->
+              <g stroke="#f0657f" stroke-width="2.2">
+                <line x1="117" y1="45" x2="127" y2="55" />
+                <line x1="127" y1="45" x2="117" y2="55" />
+                <line x1="117" y1="125" x2="127" y2="135" />
+                <line x1="127" y1="125" x2="117" y2="135" />
+              </g>
+              <!-- FRF ridge carved along imaginary axis -->
+              <path d="M 172 160 C 175 140, 212 135, 224 130 C 210 124, 180 112, 178 90 C 180 68, 210 56, 224 50 C 212 45, 175 40, 172 20" fill="none" stroke="#d98a52" stroke-width="2.5" />
+              <text x="180" y="30" fill="#26b5a6" font-family="IBM Plex Mono, monospace" font-size="10">s = iω (FRF)</text>
+              <text x="36" y="34" fill="#a9b6bf" font-family="IBM Plex Mono, monospace" font-size="10">p₁,₂ = −ζωₙ ± iω_d</text>
+              <text x="206" y="152" fill="#d98a52" font-family="IBM Plex Mono, monospace" font-size="10">|H(iω)|</text>
+            </svg>
+          </div>
+          <div class="card-body">
+            <span class="card-kicker">Module 02 · 1-DOF Transform Analysis</span>
+            <h3>Fourier and Laplace transforms in vibration analysis</h3>
+            <p>
+              See how the Fourier transform arises as the imaginary-axis slice of the 3D Laplace surface
+              |H(σ + iω)|. Explore poles, ROC, impulse response convolution, Bode/Nyquist anatomy, and all
+              six dimensional FRFs (receptance, mobility, accelerance, and reciprocals).
+            </p>
+          </div>
+          <div class="card-footer">
+            <span>Open interactive tutorial</span>
+            <span class="card-meta">/sdof-fourier-laplace/</span>
+          </div>
+        </a>
       </div>
     </div>
   </main>
