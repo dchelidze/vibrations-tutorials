@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Continuous Beams as Infinite-DOF Modal Geometry — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\phi$</div>
+        <div>
+          <span class="brand-title">Continuous beam modal geometry</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-roots">1. Roots &amp; modes</a>
+        <a href="#sec-ortho">2. Orthogonality</a>
+        <a href="#sec-superpos">3. Superposition</a>
+        <a href="#sec-bridge">4. Spectrum</a>
+        <a href="#sec-table">5. Reference</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 06</div>
+      <div class="copper-bar"></div>
+      <h1>Continuous beams as infinite-DOF modal geometry</h1>
+      <p class="hero-lead">
+        Replacing discrete masses with a continuous Euler–Bernoulli beam turns matrix eigenvectors $\mathbf{u}_n$ into
+        continuous <span class="c-blue-hero">eigenfunctions $\phi_n(x)$</span> and matrix dot products
+        $\mathbf{u}_i^{\mathsf{T}}\mathbf{M}\mathbf{u}_j$ into <span class="c-teal-hero">function-space integrals
+        $\int_0^L \phi_i(x)\phi_j(x)\,\mathrm{d}x = 0$</span>. We visualize the
+        <span class="c-orange-hero">transcendental frequency equations</span>, stationary nodal points, cancelling
+        orthogonality area lobes, and <span class="c-crimson-hero">quadratic dispersion $\omega_n \propto (\beta_n L)^2$</span>.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="bc-selector" role="tablist" aria-label="Select beam boundary condition">
+          <button class="pill active" data-bc="CF" type="button">Cantilever (CF)</button>
+          <button class="pill" data-bc="SS" type="button">Pinned–Pinned (SS)</button>
+          <button class="pill" data-bc="CC" type="button">Clamped–Clamped (CC)</button>
+          <button class="pill" data-bc="CP" type="button">Clamped–Pinned (CP)</button>
+          <button class="pill" data-bc="FF" type="button">Free–Free (FF)</button>
+        </div>
+        <p class="system-desc-inline" id="bc-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: TRANSCENDENTAL FREQUENCY EQUATION & ANIMATED MODES
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-roots">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Spatial eigenvalue problem &amp; root-finding</span>
+        <h2>1. Boundary conditions quantize a continuous beam into discrete wavenumbers $\beta_n L$</h2>
+        <p>
+          Separating variables $w(x, t) = \phi(x)q(t)$ in the Euler–Bernoulli beam PDE
+          $\rho A w_{tt} + EI w_{xxxx} = 0$ yields the fourth-order spatial eigenproblem $\phi''''(x) = \beta^4 \phi(x)$
+          with $\omega_n = (\beta_n L)^2\sqrt{EI/(\rho A L^4)}$. Imposing the four end boundary conditions collapses
+          the continuum of candidate $\beta L$ values to a discrete sequence of intersections.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="sec1-chareq"></div>
+
+        <div class="controls-row" style="margin-bottom: 10px;">
+          <div class="pill-group" id="mode-pills" role="tablist" aria-label="Select beam mode">
+            <button class="pill active" data-mode="0" type="button">Mode 1</button>
+            <button class="pill" data-mode="1" type="button">Mode 2</button>
+            <button class="pill" data-mode="2" type="button">Mode 3</button>
+            <button class="pill" data-mode="3" type="button">Mode 4</button>
+            <button class="pill" data-mode="4" type="button">Mode 5</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-mode-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Graphical characteristic roots $\beta_n L$</strong>
+              <span>Click any dot to animate that mode</span>
+            </div>
+            <div class="canvas-box h-roots">
+              <canvas id="beam-roots-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Animated mode shape $\phi_n(x/L)\cos(\omega_n t)$</strong>
+              <span>Crimson dots mark stationary interior nodes</span>
+            </div>
+            <div class="canvas-box h-roots">
+              <canvas id="beam-mode-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Selected wavenumber root</div>
+            <div class="kpi-val c-blue" id="sec1-lam"></div>
+            <div class="kpi-sub">Root of boundary-condition determinant</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Frequency scaling</div>
+            <div class="kpi-val c-orange" id="sec1-freq"></div>
+            <div class="kpi-sub">$\omega_n = (\beta_n L)^2 \sqrt{EI / (\rho A L^4)}$</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Interior nodal points</div>
+            <div class="kpi-val c-crimson" id="sec1-nodes"></div>
+            <div class="kpi-sub">Locations where $\phi_n(x) = 0$ at all $t$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: FUNCTION-SPACE ORTHOGONALITY AS CANCELLING AREA LOBES
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-ortho">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Function-space inner product</span>
+        <h2>2. Mode-shape orthogonality means positive and negative product lobes cancel identically</h2>
+        <p>
+          In 2-DOF systems, orthogonality was the sum $\mathbf{u}_i^{\mathsf{T}}\mathbf{M}\mathbf{u}_j = 0$.
+          In a uniform continuous beam, that sum becomes the $L^2$ inner product
+          $\int_0^1 \phi_i(\xi)\phi_j(\xi)\,\mathrm{d}\xi = \delta_{ij}$. For any two distinct modes $i \ne j$,
+          the positive (teal) and negative (crimson) shaded lobes of $\phi_i(\xi)\phi_j(\xi)$ enclose the exact same area.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 12px;">
+          <div class="controls-group">
+            <span style="font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;">Mode $i$:</span>
+            <div class="pill-group" id="ortho-i-pills">
+              <button class="pill active" data-idx="0" type="button">1</button>
+              <button class="pill" data-idx="1" type="button">2</button>
+              <button class="pill" data-idx="2" type="button">3</button>
+              <button class="pill" data-idx="3" type="button">4</button>
+              <button class="pill" data-idx="4" type="button">5</button>
+            </div>
+          </div>
+          <div class="controls-group">
+            <span style="font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;">Mode $j$:</span>
+            <div class="pill-group" id="ortho-j-pills">
+              <button class="pill" data-idx="0" type="button">1</button>
+              <button class="pill active" data-idx="1" type="button">2</button>
+              <button class="pill" data-idx="2" type="button">3</button>
+              <button class="pill" data-idx="3" type="button">4</button>
+              <button class="pill" data-idx="4" type="button">5</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Mode shapes $\phi_i(\xi)$ and $\phi_j(\xi)$</strong>
+              <span>Normalized to unit $L^2$ norm</span>
+            </div>
+            <div class="canvas-box h-ortho">
+              <canvas id="beam-pair-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Pointwise product $\phi_i(\xi)\phi_j(\xi)$</strong>
+              <span>Teal: positive area · Crimson: negative area</span>
+            </div>
+            <div class="canvas-box h-ortho">
+              <canvas id="beam-prod-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Mass (kinetic) orthogonality integral</div>
+            <div class="kpi-val c-teal" id="sec2-inner"></div>
+            <div class="kpi-sub">Equals $1$ for $i = j$ and $0$ for $i \ne j$</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Bending stiffness orthogonality integral</div>
+            <div class="kpi-val c-blue" id="sec2-stiff"></div>
+            <div class="kpi-sub">Continuous analog of $\mathbf{u}_i^{\mathsf{T}}\mathbf{K}\mathbf{u}_j = \omega_i^2\delta_{ij}$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: MODAL SUPERPOSITION & NODAL SUPPRESSION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-superpos">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Modal expansion &amp; spatial superposition</span>
+        <h2>3. Any beam deflection decomposes into uncoupled modal amplitudes $q_n(t)$</h2>
+        <p>
+          Projecting an initial deflection $w_0(\xi)$ onto the orthonormal basis gives
+          $q_n(0) = \int_0^1 w_0(\xi)\phi_n(\xi)\,\mathrm{d}\xi$, and the free response evolves as
+          $w(\xi, t) = \sum_{n=1}^{\infty} q_n(0)\cos(\omega_n t)\phi_n(\xi)$. Notice how placing a localized pluck
+          or bump on an interior nodal point of Mode $n$ eliminates Mode $n$ from the response.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 10px;">
+          <div class="pill-group" id="super-shape-pills" role="tablist" aria-label="Select initial deflection shape">
+            <button class="pill active" data-kind="pluck" type="button">Triangular pluck</button>
+            <button class="pill" data-kind="bump" type="button">Localized impact bump</button>
+            <button class="pill" data-kind="uniform" type="button">Smooth static bend</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-super-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+            <button id="btn-super-reset" class="btn btn-sm" type="button">Restart $t = 0$</button>
+          </div>
+        </div>
+
+        <div class="canvas-box h-super">
+          <canvas id="beam-super-canvas"></canvas>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-super-xi0">Excitation location $\xi_0 = x_0 / L$</label>
+            <input id="slider-super-xi0" class="range-teal" type="range" min="0.15" max="0.85" step="0.01" value="0.50" />
+            <span class="scrubber-val" id="val-super-xi0">&xi;<sub>0</sub> = 0.50 <i>L</i></span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-super-n">Included modes $N$</label>
+            <input id="slider-super-n" class="range-copper" type="range" min="1" max="5" step="1" value="5" />
+            <span class="scrubber-val" id="val-super-n">N = 5 modes</span>
+          </div>
+        </div>
+
+        <div class="canvas-box h-spec" style="margin-top: 12px;">
+          <canvas id="beam-spec-canvas"></canvas>
+        </div>
+
+        <div class="callout callout-blue" id="sec3-nodal-note"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: QUADRATIC FREQUENCY DISPERSION ACROSS BOUNDARY CONDITIONS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-bridge">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Bending dispersion vs. strings &amp; discrete systems</span>
+        <h2>4. Bending stiffness spreads beam natural frequencies quadratically rather than harmonically</h2>
+        <p>
+          In a taut string or axial rod ($\partial^2 u/\partial t^2 = c^2 \partial^2 u/\partial x^2$), natural
+          frequencies form integer multiples $\omega_n/\omega_1 = n$ (musical harmonics). Because Euler–Bernoulli
+          bending involves a fourth spatial derivative, $\omega_n \propto (\beta_n L)^2$ grows quadratically—producing
+          inharmonic overtones (why a tuning fork or xylophone bar sounds metallic rather than string-like).
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="canvas-box h-bridge">
+          <canvas id="beam-bridge-canvas"></canvas>
+        </div>
+
+        <details class="adv-note">
+          <summary><span>Optional advanced note: Where Euler–Bernoulli beam theory breaks down</span></summary>
+          <div class="adv-body">
+            <p>
+              Euler–Bernoulli theory neglects transverse shear deformation and cross-section rotatory inertia. That
+              approximation is accurate when the modal wavelength $\lambda_{\mathrm{wave}} \approx 2\pi/\beta_n$
+              exceeds roughly $10\times$ the beam thickness $h$. For short, thick beams or high mode numbers $n$
+              where $\beta_n h$ is no longer small, Timoshenko beam theory lowers the predicted natural frequencies
+              and caps the wave speed at the finite shear wave speed.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: BOUNDARY-CONDITION REFERENCE TABLE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-table">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Boundary-condition reference</span>
+        <h2>5. Exact dimensionless wavenumbers and frequency ratios across five end supports</h2>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table" id="bc-ref-table">
+            <thead>
+              <tr>
+                <th>Boundary condition</th>
+                <th>Frequency equation</th>
+                <th>$\beta_1 L$</th>
+                <th>$\beta_2 L$</th>
+                <th>$\beta_3 L$</th>
+                <th>$\omega_2/\omega_1$</th>
+                <th>$\omega_3/\omega_1$</th>
+                <th>Interior nodes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-bc="CF" class="selected-row">
+                <td><strong>Cantilever (CF)</strong></td>
+                <td>$\cos\lambda\cosh\lambda = -1$</td>
+                <td>$1.8751$</td>
+                <td>$4.6941$</td>
+                <td>$7.8548$</td>
+                <td>$6.267$</td>
+                <td>$17.547$</td>
+                <td>$n - 1$</td>
+              </tr>
+              <tr data-bc="SS">
+                <td><strong>Pinned–Pinned (SS)</strong></td>
+                <td>$\sin\lambda = 0$</td>
+                <td>$3.1416$</td>
+                <td>$6.2832$</td>
+                <td>$9.4248$</td>
+                <td>$4.000$</td>
+                <td>$9.000$</td>
+                <td>$n - 1$</td>
+              </tr>
+              <tr data-bc="CP">
+                <td><strong>Clamped–Pinned (CP)</strong></td>
+                <td>$\tan\lambda = \tanh\lambda$</td>
+                <td>$3.9266$</td>
+                <td>$7.0686$</td>
+                <td>$10.2102$</td>
+                <td>$3.241$</td>
+                <td>$6.762$</td>
+                <td>$n - 1$</td>
+              </tr>
+              <tr data-bc="CC">
+                <td><strong>Clamped–Clamped (CC)</strong></td>
+                <td>$\cos\lambda\cosh\lambda = 1$</td>
+                <td>$4.7300$</td>
+                <td>$7.8532$</td>
+                <td>$10.9956$</td>
+                <td>$2.757$</td>
+                <td>$5.404$</td>
+                <td>$n - 1$</td>
+              </tr>
+              <tr data-bc="FF">
+                <td><strong>Free–Free (FF, elastic)</strong></td>
+                <td>$\cos\lambda\cosh\lambda = 1$</td>
+                <td>$4.7300$</td>
+                <td>$7.8532$</td>
+                <td>$10.9956$</td>
+                <td>$2.757$</td>
+                <td>$5.404$</td>
+                <td>$n + 1$</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: WORKFLOW & LIVE CODE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Analysis recipe &amp; code</span>
+        <h2>6. Step-by-step continuous beam modal analysis workflow</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Beam modal procedure (Inman 6.5)</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Identify supports and geometric/natural BCs.</strong> Clamped: $w = w' = 0$; pinned: $w = w'' = 0$; free: $w'' = w''' = 0$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Solve for dimensionless roots $\beta_n L$.</strong> Extract roots from the transcendental equation and compute $\omega_n = (\beta_n L)^2\sqrt{EI/(\rho A L^4)}$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Normalize mode shapes $\phi_n(\xi)$.</strong> Use cancellation-free exponentials for high modes and normalize $\int_0^1 \phi_n^2\,\mathrm{d}\xi = 1$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Project initial conditions and distributed loads.</strong> Compute $q_n(0) = \int_0^1 w_0\phi_n\,\mathrm{d}\xi$ and $Q_n(t) = \int_0^L f(x,t)\phi_n(x/L)\,\mathrm{d}x$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Truncate and audit slenderness.</strong> Keep all modes up to $2\times$ the highest excitation frequency and check $\lambda_{\mathrm{wave}} \gg h$.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify active beam BCs in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (NumPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <script defer src="js/math-beam.js"></script>
+  <script defer src="js/viz-roots.js"></script>
+  <script defer src="js/viz-ortho.js"></script>
+  <script defer src="js/viz-superpos.js"></script>
+  <script defer src="js/viz-bridge.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>

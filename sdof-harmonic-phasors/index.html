@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harmonic Forcing, Force-Polygon Geometry &amp; Phase Resonance — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\phi$</div>
+        <div>
+          <span class="brand-title">Harmonic forcing &amp; phase resonance</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-polygon">1. Force polygon</a>
+        <a href="#sec-bode">2. Bode &amp; Nyquist</a>
+        <a href="#sec-beating">3. Beating</a>
+        <a href="#sec-power">4. Power &amp; Q</a>
+        <a href="#sec-regimes">5. Regimes</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 07</div>
+      <div class="copper-bar"></div>
+      <h1>Harmonic forcing, rotating force-polygon geometry, and phase resonance</h1>
+      <p class="hero-lead">
+        Under steady harmonic excitation $m\ddot{x} + c\dot{x} + kx = F_0\cos(\omega t)$, equilibrium is a closed
+        <span class="c-orange-hero">four-vector polygon in the complex plane</span>. We show geometrically why
+        <span class="c-teal-hero">phase resonance ($\phi = 90^\circ$ at $r = 1$)</span> cancels stiffness against
+        inertia, how <span class="c-blue-hero">amplitude peaks shift below $r = 1$</span>, why near-resonant undamped
+        motion <span class="c-crimson-hero">beats through two drifting phasors</span>, and how half-power bandwidth
+        measures damping directly.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select harmonic regime">
+          <button class="pill active" data-preset="phase_res" type="button">Phase resonance ($r = 1$)</button>
+          <button class="pill" data-preset="stiffness_dom" type="button">Stiffness ($r = 0.35$)</button>
+          <button class="pill" data-preset="mass_dom" type="button">Mass ($r = 2.20$)</button>
+          <button class="pill" data-preset="heavy_damp" type="button">Heavy ($\zeta = 0.50$)</button>
+          <button class="pill" data-preset="light_damp" type="button">Sharp ($\zeta = 0.05$)</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: FORCE-BALANCE POLYGON & PHASE RESONANCE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-polygon">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Complex force-balance geometry</span>
+        <h2>1. At phase resonance ($r = 1$), inertia cancels stiffness and damping alone opposes $F_0$</h2>
+        <p>
+          Writing $x(t) = \operatorname{Re}\big(X\mathrm{e}^{\mathrm{i}(\omega t - \phi)}\big)$ turns the differential
+          equation into a geometric vector sum: stiffness $kX$ along $0^\circ$, viscous damping $\mathrm{i}c\omega X$
+          leading by $+90^\circ$, and inertia $-m\omega^2 X$ opposing at $+180^\circ$ must close head-to-tail onto
+          the external drive $F_0$ at $+\phi$ ahead of displacement.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Forced 1-DOF oscillator &amp; live phase lag $\phi$</strong>
+              <span>Copper: $F_0(t)$ · Blue: $x(t)$</span>
+            </div>
+            <div class="canvas-box h-poly">
+              <canvas id="harm-rig-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Force-balance quadrilateral $kX + \mathrm{i}c\omega X - m\omega^2 X = F_0$</strong>
+              <span>Normalized by $F_0$ (unit circle)</span>
+            </div>
+            <div class="canvas-box h-poly">
+              <canvas id="harm-poly-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-r">Frequency ratio $r = \omega / \omega_{\mathrm{n}}$</label>
+            <input id="slider-r" class="range-copper" type="range" min="0.08" max="2.80" step="0.01" value="1.00" />
+            <span class="scrubber-val" id="val-r">r = 1.00</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-zeta">Damping ratio $\zeta$</label>
+            <input id="slider-zeta" class="range-teal" type="range" min="0.04" max="1.00" step="0.01" value="0.15" />
+            <span class="scrubber-val" id="val-zeta">ζ = 0.15</span>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-poly-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+            <button id="btn-snap-stiff" class="btn btn-sm" type="button">Stiffness ($r = 0.35$)</button>
+            <button id="btn-snap-peak" class="btn btn-sm" type="button">Amplitude peak ($r_{\mathrm{peak}}$)</button>
+            <button id="btn-snap-phase" class="btn btn-sm" type="button">Phase resonance ($r = 1$)</button>
+            <button id="btn-snap-mass" class="btn btn-sm" type="button">Mass ($r = 2.20$)</button>
+          </div>
+          <label class="checkbox-label">
+            <input id="chk-rotate-poly" type="checkbox" />
+            <span>Rotate polygon live at $\omega$</span>
+          </label>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Dynamic magnification</div>
+            <div class="kpi-val c-blue" id="sec1-mag"></div>
+            <div class="kpi-sub">$M(r,\zeta) = [(1-r^2)^2 + (2\zeta r)^2]^{-1/2}$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Phase lag $\phi$ behind $F_0$</div>
+            <div class="kpi-val c-teal" id="sec1-phi"></div>
+            <div class="kpi-sub">Crosses $90^\circ$ at $r = 1$ for every $\zeta &gt; 0$</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Inertia-to-stiffness ratio</div>
+            <div class="kpi-val c-crimson" id="sec1-ratio"></div>
+            <div class="kpi-sub">Equals $1.00$ at exact phase resonance</div>
+          </div>
+        </div>
+
+        <div class="callout callout-teal" id="sec1-callout"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: BODE MAGNITUDE/PHASE & NYQUIST LOCUS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-bode">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Frequency response &amp; complex receptance</span>
+        <h2>2. Damping shifts the amplitude peak left to $r_{\mathrm{peak}} = \sqrt{1 - 2\zeta^2}$ while phase stays pinned at $r = 1$</h2>
+        <p>
+          Sweeping $r$ traces the Bode magnitude/phase curves on the left and the complex receptance loop
+          $kH(\mathrm{i}\omega) = 1/[(1-r^2) + \mathrm{i}2\zeta r]$ on the right. Notice that every damping curve
+          pivots through $(r, \phi) = (1, 90^\circ)$ on the pure imaginary axis, whereas the farthest point from the
+          origin (amplitude peak) occurs slightly earlier at $r_{\mathrm{peak}} = \sqrt{1 - 2\zeta^2}$ whenever $\zeta &lt; 1/\sqrt{2}$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Bode magnitude $M(r, \zeta)$ &amp; phase $\phi(r, \zeta)$</strong>
+              <span>Drag cursor horizontally to sweep $r$</span>
+            </div>
+            <div class="canvas-box h-bode">
+              <canvas id="harm-bode-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex receptance Nyquist locus $kH(\mathrm{i}\omega)$</strong>
+              <span>Teal: phase resonance ($r=1$) · Crimson: peak ($r_{\mathrm{peak}}$)</span>
+            </div>
+            <div class="canvas-box h-bode">
+              <canvas id="harm-nyquist-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Amplitude peak location</div>
+            <div class="kpi-val c-crimson" id="sec2-peak"></div>
+            <div class="kpi-sub">$r_{\mathrm{peak}} = \sqrt{1 - 2\zeta^2}$ for $\zeta &lt; 0.707$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Quality factor $Q$</div>
+            <div class="kpi-val c-teal" id="sec2-q"></div>
+            <div class="kpi-sub">Magnification at exact phase resonance ($r = 1$)</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Complex receptance $kH(\mathrm{i}\omega)$</div>
+            <div class="kpi-val c-blue" id="sec2-h"></div>
+            <div class="kpi-sub">Purely imaginary at $r = 1$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: UNDAMPED BEATING & SECULAR RESONANCE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-beating">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Undamped near-resonance geometry ($\zeta = 0$)</span>
+        <h2>3. Beating is two nearly synchronous rotating vectors drifting in and out of phase</h2>
+        <p>
+          Starting an undamped oscillator from rest ($x(0) = \dot{x}(0) = 0$) excites both the forced response at
+          $\omega$ and an equal-amplitude free oscillation at $\omega_{\mathrm{n}}$:
+          $x(\tau)/X_{\mathrm{st}} = (\cos r\tau - \cos\tau)/(1 - r^2)$. As the two rotating phasors drift in and out
+          of phase, the resultant envelope swells and cancels periodically; right at $r = 1$, the beat period stretches
+          to infinity and produces linear secular growth $\tfrac{1}{2}\tau\sin\tau$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Two-phasor beating interference</strong>
+              <span>Real projection equals $x(\tau)$</span>
+            </div>
+            <div class="canvas-box h-beat">
+              <canvas id="harm-beat-phasor-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Undamped response $x(\tau)/X_{\mathrm{st}}$ &amp; beat envelope</strong>
+              <span>Set $r = 1.00$ for linear secular resonance</span>
+            </div>
+            <div class="canvas-box h-beat">
+              <canvas id="harm-beat-wave-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-rbeat">Undamped drive ratio $r = \omega / \omega_{\mathrm{n}}$</label>
+          <input id="slider-rbeat" class="range-blue" type="range" min="0.76" max="1.24" step="0.01" value="0.90" />
+          <span class="scrubber-val" id="val-rbeat">r = 0.90</span>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-beat-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+            <button id="btn-beat-near" class="btn btn-sm" type="button">Beating ($r = 0.90$)</button>
+            <button id="btn-beat-res" class="btn btn-sm" type="button">Exact resonance ($r = 1.00$)</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Beat frequency</div>
+            <div class="kpi-val c-blue" id="sec3-fbeat"></div>
+            <div class="kpi-sub">Slow envelope modulation rate</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Beat envelope ceiling</div>
+            <div class="kpi-val c-crimson" id="sec3-amp"></div>
+            <div class="kpi-sub">Unbounded linear growth at $r = 1$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: INPUT POWER BALANCE & HALF-POWER BANDWIDTH
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-power">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Energy balance &amp; half-power damping identification</span>
+        <h2>4. Average input power peaks strictly at $r = 1$ with exact half-power width $\Delta r = 2\zeta$</h2>
+        <p>
+          In steady state, average power injected by the drive equals average viscous dissipation:
+          $\bar{P}(r) = \tfrac{1}{2} F_0 \omega |X|\sin\phi$. Because velocity leads displacement by $90^\circ$,
+          force and velocity align completely at $\phi = 90^\circ$ ($\sin\phi = 1$, straight positive-slope line on the
+          right). The two half-power frequencies where $\bar{P}(r) = \tfrac{1}{2}\bar{P}_{\max}$ obey
+          $r_{1,2} = \sqrt{1 + \zeta^2} \mp \zeta$, giving the exact identity $\Delta r = r_2 - r_1 \equiv 2\zeta$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Normalized average power $\bar{P}(r)/\bar{P}_{\max}$</strong>
+              <span>Shaded exact half-power band $\Delta r = 2\zeta$</span>
+            </div>
+            <div class="canvas-box h-power">
+              <canvas id="harm-power-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Force–velocity phase alignment ($F/F_0$ vs. $v/v_{\max}$)</strong>
+              <span>Collapses to a $+45^\circ$ line at $\phi = 90^\circ$</span>
+            </div>
+            <div class="canvas-box h-power">
+              <canvas id="harm-work-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Exact half-power bandwidth</div>
+            <div class="kpi-val c-teal" id="sec4-bw"></div>
+            <div class="kpi-sub">Experimental damping rule: $\zeta = \Delta\omega / (2\omega_{\mathrm{n}})$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Force–velocity power factor</div>
+            <div class="kpi-val c-orange" id="sec4-pf"></div>
+            <div class="kpi-sub">Equals $1.000$ at exact phase resonance</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Relative power absorption</div>
+            <div class="kpi-val c-blue" id="sec4-pnorm"></div>
+            <div class="kpi-sub">$\bar{P} = 0.5\,\bar{P}_{\max}$ at $r = r_1, r_2$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: REGIME TABLE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-regimes">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Dynamic regimes</span>
+        <h2>5. Three frequency regimes and the right engineering lever in each</h2>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Regime</th>
+                <th>Frequency range</th>
+                <th>Dominant balance</th>
+                <th>Asymptote &amp; phase</th>
+                <th>Effective design lever</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Stiffness-controlled</strong></td>
+                <td>$r \ll 1$</td>
+                <td>$kX \approx F_0$</td>
+                <td>$M \to 1$, $\phi \to 0^\circ$</td>
+                <td>Increase stiffness $k$ (damping &amp; mass barely help)</td>
+              </tr>
+              <tr>
+                <td><strong>Damping-controlled</strong></td>
+                <td>$r \approx 1$</td>
+                <td>$c\omega X \approx F_0$ ($kX = m\omega^2 X$)</td>
+                <td>$M(1) = 1/(2\zeta)$, $\phi = 90^\circ$</td>
+                <td>Add damping $c$ or detune $\omega_{\mathrm{n}}$ away from $\omega$</td>
+              </tr>
+              <tr>
+                <td><strong>Mass-controlled</strong></td>
+                <td>$r \gg 1$</td>
+                <td>$-m\omega^2 X \approx F_0$</td>
+                <td>$M \sim 1/r^2$, $\phi \to 180^\circ$</td>
+                <td>Increase mass $m$ (stiffness &amp; damping barely help)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: WORKFLOW & LIVE CODE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Verification &amp; code</span>
+        <h2>6. Harmonic steady-state workflow and verification code</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Steady-state harmonic recipe (Inman 2.1–2.3)</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Normalize to $(\omega_{\mathrm{n}}, \zeta, X_{\mathrm{st}})$.</strong> Compute $\omega_{\mathrm{n}} = \sqrt{k/m}$,
+                $\zeta = c/(2\sqrt{km})$, $X_{\mathrm{st}} = F_0/k$, and frequency ratio $r = \omega/\omega_{\mathrm{n}}$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Identify the controlling regime first.</strong> Check $r \ll 1$ (stiffness), $r \approx 1$ (damping),
+                or $r \gg 1$ (mass) before plugging into formulas.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Evaluate complex receptance.</strong> Use $X = (F_0/k)/[(1 - r^2) + \mathrm{i}2\zeta r]$ to get
+                both amplitude $|X| = M X_{\mathrm{st}}$ and lag $\phi = \operatorname{atan2}(2\zeta r, 1 - r^2)$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Separate phase resonance from amplitude peak.</strong> Phase crosses $90^\circ$ at $r = 1$;
+                displacement peaks at $r_{\mathrm{peak}} = \sqrt{1 - 2\zeta^2}$ (for $\zeta &lt; 1/\sqrt{2}$).
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Extract experimental $\zeta$ via half-power width.</strong> Measure $\Delta\omega = \omega_2 - \omega_1$
+                at $-3$ dB ($M_{\max}/\sqrt{2}$) and estimate $\zeta \approx \Delta\omega / (2\omega_{\mathrm{n}})$.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify active $(r, \zeta)$ point in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (NumPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <script defer src="js/math-harmonic.js"></script>
+  <script defer src="js/viz-force-poly.js"></script>
+  <script defer src="js/viz-bode-nyquist.js"></script>
+  <script defer src="js/viz-beating.js"></script>
+  <script defer src="js/viz-power.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
