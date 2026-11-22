@@ -63,10 +63,24 @@
       const m1Y = m1RestY - x1;
       const maY = maRestY - xa;
 
-      const m1W = 122;
+      const m1Label = 'Primary m₁';
+      const m1Sub = '|X₁|/Xst = ' + M.fmt(res.M1, 2);
+      const maLabel = 'mₐ (μ=' + M.fmt(sys.mu, 2) + ')';
+      const maSub = '|Xₐ|/Xst = ' + M.fmt(res.Ma, 2);
+
+      ctx.font = '600 13.5px "IBM Plex Sans", sans-serif';
+      const m1TextW = ctx.measureText(m1Label).width;
+      ctx.font = '500 11px "IBM Plex Mono", monospace';
+      const m1SubW = ctx.measureText(m1Sub).width;
+      const m1W = Math.max(132, Math.ceil(Math.max(m1TextW, m1SubW)) + 24);
       const m1H = 54;
-      const maW = Math.max(92, Math.min(116, 86 + sys.mu * 80));
-      const maH = 44;
+
+      ctx.font = '600 12.5px "IBM Plex Sans", sans-serif';
+      const maTextW = ctx.measureText(maLabel).width;
+      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
+      const maSubW = ctx.measureText(maSub).width;
+      const maW = Math.max(114, Math.ceil(Math.max(maTextW, maSubW)) + 24);
+      const maH = 46;
 
       // Ground base with hatching
       ctx.strokeStyle = C.axis;
@@ -133,10 +147,10 @@
       ctx.font = '600 13.5px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Primary m₁', cx, m1Y - 7);
+      ctx.fillText(m1Label, cx, m1Y - 8);
       ctx.fillStyle = C.textMuted;
       ctx.font = '500 11px "IBM Plex Mono", monospace';
-      ctx.fillText('|X₁|/Xst = ' + M.fmt(res.M1, 2), cx, m1Y + 11);
+      ctx.fillText(m1Sub, cx, m1Y + 11);
 
       // Absorber mass block ma
       ctx.fillStyle = C.bgSubtle;
@@ -148,10 +162,10 @@
       ctx.font = '600 12.5px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('mₐ (μ=' + M.fmt(sys.mu, 2) + ')', cx, maY - 5);
+      ctx.fillText(maLabel, cx, maY - 8);
       ctx.fillStyle = C.textMuted;
       ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.fillText('|Xₐ|/Xst=' + M.fmt(res.Ma, 2), cx, maY + 9);
+      ctx.fillText(maSub, cx, maY + 10);
 
       // Live vertical harmonic force arrows on m1: external F0 (left) vs absorber reaction Fa (right)
       const f0Inst = Math.cos(state.phaseTime);
