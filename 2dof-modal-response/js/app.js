@@ -205,7 +205,11 @@
 
     const readoutEl = document.getElementById('ortho-probe-readout');
     if (readoutEl) {
-      readoutEl.textContent = 'x₀ = [' + M.fmt(x0[0], 2) + ', ' + M.fmt(x0[1], 2) + ']ᵀ';
+      renderTex(
+        readoutEl,
+        '\\mathbf{x}_0 = [' + M.fmt(x0[0], 2) + ',\\,' + M.fmt(x0[1], 2) + ']^{\\mathsf{T}}',
+        false
+      );
     }
   }
 
@@ -289,7 +293,13 @@
     const frac2 = qNorm > 1e-9 ? (Q[1] * Q[1]) / (qNorm * qNorm) : 0;
 
     const fRead = document.getElementById('force-vec-readout');
-    if (fRead) fRead.textContent = 'f₀ = [' + M.fmt(f0[0], 2) + ', ' + M.fmt(f0[1], 2) + ']ᵀ N';
+    if (fRead) {
+      renderTex(
+        fRead,
+        '\\mathbf{f}_0 = [' + M.fmt(f0[0], 2) + ',\\,' + M.fmt(f0[1], 2) + ']^{\\mathsf{T}}\\;\\text{N}',
+        false
+      );
+    }
 
     const kQ1 = document.getElementById('sec3-q1');
     const kQ2 = document.getElementById('sec3-q2');

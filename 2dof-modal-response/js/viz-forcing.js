@@ -127,7 +127,7 @@
       const u1Hat = [u1[0] / n1, u1[1] / n1];
       const u2Hat = [u2[0] / n2, u2[1] / n2];
 
-      function drawZeroLine(uHat, color, label) {
+      function drawZeroLine(uHat, color, idxStr, modeNum) {
         // Perpendicular to uHat
         const px = -uHat[1];
         const py = uHat[0];
@@ -141,33 +141,43 @@
         ctx.moveTo(toX(-px * L), toY(-py * L));
         ctx.lineTo(toX(px * L), toY(py * L));
         ctx.stroke();
-        ctx.globalAlpha = 0.9;
-        ctx.fillStyle = color;
-        ctx.font = '600 10.5px "IBM Plex Mono", monospace';
-        const lx = toX(px * 1.24);
-        const ly = toY(py * 1.24);
-        ctx.textAlign = px >= 0 ? 'left' : 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(label, lx + (px >= 0 ? 4 : -4), ly);
         ctx.restore();
+        const lx = toX(px * 1.22);
+        const ly = toY(py * 1.22);
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Q', i: true, bold: true },
+            { t: idxStr, sub: true, bold: true },
+            { t: ' = 0 (no Mode ' + modeNum + ')', bold: true }
+          ],
+          lx + (px >= 0 ? 4 : -4),
+          ly,
+          { size: 10.5, color, align: px >= 0 ? 'left' : 'right', family: '"IBM Plex Mono", monospace' }
+        );
       }
 
-      drawZeroLine(u1Hat, C.teal, 'Q₁=0 (no Mode 1)');
-      drawZeroLine(u2Hat, C.crimson, 'Q₂=0 (no Mode 2)');
+      drawZeroLine(u1Hat, C.teal, '1', '1');
+      drawZeroLine(u2Hat, C.crimson, '2', '2');
 
       // Mode direction rays u1, u2 (scaled to 1.05 for clear visual reference)
       Theme.drawArrow(ctx, cx, cy, toX(u1Hat[0] * 1.05), toY(u1Hat[1] * 1.05), C.teal, 2.0, 8);
       Theme.drawArrow(ctx, cx, cy, toX(u2Hat[0] * 1.05), toY(u2Hat[1] * 1.05), C.crimson, 2.0, 8);
 
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.fillStyle = C.teal;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('u₁ dir', toX(u1Hat[0] * 1.08) + 4, toY(u1Hat[1] * 1.08));
-      ctx.fillStyle = C.crimson;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('u₂ dir', toX(u2Hat[0] * 1.08) - 4, toY(u2Hat[1] * 1.08));
+      Theme.drawMath(
+        ctx,
+        [{ t: 'u', bold: true }, { t: '1', sub: true, bold: true }, { t: ' dir', bold: true }],
+        toX(u1Hat[0] * 1.08) + 4,
+        toY(u1Hat[1] * 1.08) - 6,
+        { size: 11.5, color: C.teal, align: 'left' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'u', bold: true }, { t: '2', sub: true, bold: true }, { t: ' dir', bold: true }],
+        toX(u2Hat[0] * 1.08) - 4,
+        toY(u2Hat[1] * 1.08) - 6,
+        { size: 11.5, color: C.crimson, align: 'right' }
+      );
 
       // Orthogonal drops from f0 onto u1Hat and u2Hat (geometric meaning of Euclidean dot product Q_j = u_j^T f0!)
       const f0 = state.f0;
@@ -216,21 +226,29 @@
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = C.copper;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('f₀ (drag)', toX(f0[0]) + 10, toY(f0[1]) - 4);
+      Theme.drawMath(
+        ctx,
+        [{ t: 'f', bold: true }, { t: '0', sub: true, bold: true }, { t: ' (drag)', bold: true }],
+        toX(f0[0]) + 10,
+        toY(f0[1]) - 4,
+        { size: 12, color: C.copper, align: 'left' }
+      );
 
-      // Axis labels
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('F₁ (N)', w - 16, cy - 6);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('F₂ (N)', cx + 8, 18);
+      // Axis labels cleanly typeset
+      Theme.drawMath(
+        ctx,
+        [{ t: 'F', i: true, bold: true }, { t: '1', sub: true, bold: true }, { t: ' (N)', bold: true }],
+        w - 16,
+        cy - 11,
+        { size: 12, color: C.textMuted, align: 'right' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'F', i: true, bold: true }, { t: '2', sub: true, bold: true }, { t: ' (N)', bold: true }],
+        cx + 8,
+        22,
+        { size: 12, color: C.textMuted, align: 'left' }
+      );
     }
 
     function drawRespCanvas() {
@@ -290,15 +308,16 @@
         ctx.lineTo(padL + plotW, py);
         ctx.stroke();
 
-        ctx.fillStyle = C.textMuted;
-        ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('10' + (d === 0 ? '⁰' : d === 1 ? '¹' : d === -1 ? '⁻¹' : d === -2 ? '⁻²' : d === -3 ? '⁻³' : d === -4 ? '⁻⁴' : '^' + d), padL - 7, py);
+        Theme.drawMath(ctx, [{ t: '10' }, { t: String(d), sup: true }], padL - 7, py, {
+          size: 10.5,
+          color: C.textMuted,
+          align: 'right',
+          family: '"IBM Plex Mono", monospace'
+        });
       }
 
       // Natural frequency reference lines
-      function drawFreqLine(wf, label, color) {
+      function drawFreqLine(wf, idxStr, color) {
         const px = toX(wf);
         ctx.save();
         ctx.strokeStyle = color;
@@ -308,16 +327,18 @@
         ctx.moveTo(px, padT);
         ctx.lineTo(px, padT + plotH);
         ctx.stroke();
-        ctx.fillStyle = color;
-        ctx.font = '600 11px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(label, px, padT - 4);
         ctx.restore();
+        Theme.drawMath(
+          ctx,
+          [{ t: 'ω', bold: true }, { t: idxStr, sub: true, bold: true }, { t: ' = ' + M.fmt(wf, 2), bold: true }],
+          px,
+          padT - 11,
+          { size: 11, color, align: 'center', family: '"IBM Plex Mono", monospace' }
+        );
       }
 
-      drawFreqLine(sys.w1, 'ω₁=' + M.fmt(sys.w1, 2), C.teal);
-      drawFreqLine(sys.w2, 'ω₂=' + M.fmt(sys.w2, 2), C.crimson);
+      drawFreqLine(sys.w1, '1', C.teal);
+      drawFreqLine(sys.w2, '2', C.crimson);
 
       // Plot |X1(w)| and |X2(w)|
       function drawCurve(arr, color, width) {

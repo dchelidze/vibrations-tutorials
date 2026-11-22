@@ -130,25 +130,41 @@
       ctx.stroke();
 
       // ---- LEFT HALF: Coupled Physical 2-DOF Chain ----
-      ctx.fillStyle = C.text;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('Coupled physical coordinates (x₁, x₂)', 14, 10);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Coupled physical coordinates (', bold: true },
+          { t: 'x', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ', ', bold: true },
+          { t: 'x', i: true, bold: true },
+          { t: '2', sub: true, bold: true },
+          { t: ')', bold: true }
+        ],
+        14,
+        16,
+        { size: 12, color: C.text, align: 'left' }
+      );
 
       const leftWall = 26;
       const rightWall = splitX - 24;
       const hasK3 = sys.params.k3 > 1e-4;
       const span = rightWall - leftWall;
       const trackY = h * 0.56;
-      const boxW = Math.min(54, Math.max(38, span * 0.14));
-      const boxH = 44;
+
+      // Auto-size mass blocks m1, m2 so labels ALWAYS fit comfortably inside
+      const m1SubStr = M.fmt(sys.params.m1, 1) + ' kg';
+      const m2SubStr = M.fmt(sys.params.m2, 1) + ' kg';
+      const m1SubW = Theme.measureMathRuns(ctx, [{ t: m1SubStr }], 10.5, '"IBM Plex Mono", monospace');
+      const m2SubW = Theme.measureMathRuns(ctx, [{ t: m2SubStr }], 10.5, '"IBM Plex Mono", monospace');
+      const boxW = Math.min(90, Math.max(68, Math.ceil(Math.max(m1SubW, m2SubW)) + 24));
+      const boxH = 48;
 
       // Normalize displacement visually so boxes never collide
       const maxX = Math.max(0.8, ...state.traj.x1.map(Math.abs), ...state.traj.x2.map(Math.abs));
-      const dispScale = Math.min(28, (span - 2 * boxW) * 0.12) / maxX;
+      const dispScale = Math.min(26, (span - 2 * boxW) * 0.11) / maxX;
 
-      const x1Rest = leftWall + span * (hasK3 ? 0.33 : 0.38);
+      const x1Rest = leftWall + span * (hasK3 ? 0.33 : 0.37);
       const x2Rest = leftWall + span * (hasK3 ? 0.67 : 0.74);
       const x1Pos = x1Rest + s.x1 * dispScale;
       const x2Pos = x2Rest + s.x2 * dispScale;
@@ -224,67 +240,104 @@
       }
 
       // Spring labels
-      ctx.font = '500 11px "IBM Plex Mono", monospace';
-      ctx.fillStyle = C.textMuted;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('k₁', 0.5 * (leftWall + x1Pos - boxW * 0.5), springY - 10);
-      ctx.fillText('k₂', 0.5 * (x1Pos + x2Pos), springY - 10);
+      Theme.drawMath(ctx, [{ t: 'k', i: true }, { t: '1', sub: true }], 0.5 * (leftWall + x1Pos - boxW * 0.5), springY - 14, {
+        size: 11,
+        color: C.textMuted,
+        align: 'center'
+      });
+      Theme.drawMath(ctx, [{ t: 'k', i: true }, { t: '2', sub: true }], 0.5 * (x1Pos + x2Pos), springY - 14, {
+        size: 11,
+        color: C.textMuted,
+        align: 'center'
+      });
       if (hasK3) {
-        ctx.fillText('k₃', 0.5 * (x2Pos + boxW * 0.5 + rightWall), springY - 10);
+        Theme.drawMath(ctx, [{ t: 'k', i: true }, { t: '3', sub: true }], 0.5 * (x2Pos + boxW * 0.5 + rightWall), springY - 14, {
+          size: 11,
+          color: C.textMuted,
+          align: 'center'
+        });
       }
 
-      // Mass blocks m1, m2
-      function drawMass(xc, label, sub, color) {
-        ctx.fillStyle = C.surface || C.bgSubtle;
+      // Mass blocks m1, m2 (typographic labels cleanly centered inside)
+      function drawMass(xc, subIdx, subStr, color) {
+        ctx.fillStyle = C.bgSubtle;
         ctx.strokeStyle = color;
         ctx.lineWidth = 2.2;
         ctx.fillRect(xc - boxW * 0.5, trackY - boxH * 0.5, boxW, boxH);
         ctx.strokeRect(xc - boxW * 0.5, trackY - boxH * 0.5, boxW, boxH);
-        ctx.fillStyle = color;
-        ctx.font = '600 13px "IBM Plex Sans", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(label, xc, trackY - 5);
-        ctx.fillStyle = C.textMuted;
-        ctx.font = '500 10px "IBM Plex Mono", monospace';
-        ctx.fillText(sub, xc, trackY + 11);
+        Theme.drawMath(ctx, [{ t: 'm', i: true, bold: true }, { t: subIdx, sub: true, bold: true }], xc, trackY - 8, {
+          size: 13.5,
+          color,
+          align: 'center'
+        });
+        Theme.drawMath(ctx, [{ t: subStr }], xc, trackY + 11, {
+          size: 10.5,
+          color: C.textMuted,
+          align: 'center',
+          family: '"IBM Plex Mono", monospace'
+        });
       }
-      drawMass(x1Pos, 'm₁', M.fmt(sys.params.m1, 1) + ' kg', C.blue);
-      drawMass(x2Pos, 'm₂', M.fmt(sys.params.m2, 1) + ' kg', C.orange);
+      drawMass(x1Pos, '1', m1SubStr, C.blue);
+      drawMass(x2Pos, '2', m2SubStr, C.orange);
 
-      // Displacement arrows above masses
-      ctx.font = '600 11px "IBM Plex Mono", monospace';
-      ctx.fillStyle = C.blue;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('x₁=' + M.fmt(s.x1, 2), x1Rest, trackY - boxH * 0.5 - 19);
-      ctx.fillStyle = C.orange;
-      ctx.fillText('x₂=' + M.fmt(s.x2, 2), x2Rest, trackY - boxH * 0.5 - 19);
-
-      // ---- RIGHT HALF: Two Decoupled 1-DOF Modal Oscillators ----
-      ctx.fillStyle = C.text;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(
-        sys.isProportional
-          ? 'Uncoupled modal oscillators (r₁, r₂)'
-          : 'Modal coordinates (coupled via c̃₁₂ ≠ 0)',
-        splitX + 14,
-        10
+      // Displacement readouts above masses
+      Theme.drawMath(
+        ctx,
+        [{ t: 'x', i: true, bold: true }, { t: '1', sub: true, bold: true }, { t: ' = ' + M.fmt(s.x1, 2), bold: true }],
+        x1Rest,
+        trackY - boxH * 0.5 - 24,
+        { size: 11, color: C.blue, align: 'center', family: '"IBM Plex Mono", monospace' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'x', i: true, bold: true }, { t: '2', sub: true, bold: true }, { t: ' = ' + M.fmt(s.x2, 2), bold: true }],
+        x2Rest,
+        trackY - boxH * 0.5 - 24,
+        { size: 11, color: C.orange, align: 'center', family: '"IBM Plex Mono", monospace' }
       );
 
-      const mLeft = splitX + 26;
-      const mRight = w - 20;
-      const mSpan = mRight - mLeft;
-      const mBoxW = 42;
-      const mBoxH = 30;
-      const maxR = Math.max(0.8, ...state.traj.r1.map(Math.abs), ...state.traj.r2.map(Math.abs));
-      const rScale = Math.min(34, mSpan * 0.16) / maxR;
+      // ---- RIGHT HALF: Two Decoupled 1-DOF Modal Oscillators ----
+      if (sys.isProportional) {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Uncoupled modal oscillators (', bold: true },
+            { t: 'r', i: true, bold: true },
+            { t: '1', sub: true, bold: true },
+            { t: ', ', bold: true },
+            { t: 'r', i: true, bold: true },
+            { t: '2', sub: true, bold: true },
+            { t: ')', bold: true }
+          ],
+          splitX + 14,
+          16,
+          { size: 12, color: C.text, align: 'left' }
+        );
+      } else {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Modal coordinates (coupled: ', bold: true },
+            { t: 'c̃', i: true, bold: true },
+            { t: '12', sub: true, bold: true },
+            { t: ' ≠ 0)', bold: true }
+          ],
+          splitX + 14,
+          16,
+          { size: 12, color: C.crimson, align: 'left' }
+        );
+      }
 
-      function drawModalLane(yCenter, val, wn, zeta, label, color) {
-        const restX = mLeft + mSpan * 0.54;
+      const mLeft = splitX + 26;
+      const mRight = w - 16;
+      const mSpan = mRight - mLeft;
+      const mBoxW = 52;
+      const mBoxH = 34;
+      const maxR = Math.max(0.8, ...state.traj.r1.map(Math.abs), ...state.traj.r2.map(Math.abs));
+      const rScale = Math.min(28, mSpan * 0.13) / maxR;
+
+      function drawModalLane(yCenter, val, wn, zeta, idxStr, color) {
+        const restX = mLeft + mSpan * 0.44;
         const posX = restX + val * rScale;
 
         drawWall(ctx, mLeft, yCenter - 18, yCenter + 18, false, C);
@@ -307,23 +360,36 @@
         ctx.fillRect(posX - mBoxW * 0.5, yCenter - mBoxH * 0.5, mBoxW, mBoxH);
         ctx.strokeRect(posX - mBoxW * 0.5, yCenter - mBoxH * 0.5, mBoxW, mBoxH);
 
-        ctx.fillStyle = color;
-        ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(label, posX, yCenter);
+        Theme.drawMath(ctx, [{ t: 'r', i: true, bold: true }, { t: idxStr, sub: true, bold: true }], posX, yCenter, {
+          size: 13,
+          color,
+          align: 'center'
+        });
 
-        ctx.fillStyle = C.textMuted;
-        ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('ω=' + M.fmt(wn, 2) + '  ζ=' + M.fmt(zeta, 3), mLeft + mSpan * 0.72, yCenter - 8);
-        ctx.fillStyle = color;
-        ctx.fillText(label + '=' + M.fmt(val, 2), mLeft + mSpan * 0.72, yCenter + 8);
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'ω' },
+            { t: idxStr, sub: true },
+            { t: ' = ' + M.fmt(wn, 2) + '  ζ' },
+            { t: idxStr, sub: true },
+            { t: ' = ' + M.fmt(zeta, 3) }
+          ],
+          w - 14,
+          yCenter - 9,
+          { size: 10.5, color: C.textMuted, align: 'right', family: '"IBM Plex Mono", monospace' }
+        );
+        Theme.drawMath(
+          ctx,
+          [{ t: 'r', i: true, bold: true }, { t: idxStr, sub: true, bold: true }, { t: ' = ' + M.fmt(val, 2), bold: true }],
+          w - 14,
+          yCenter + 9,
+          { size: 10.5, color, align: 'right', family: '"IBM Plex Mono", monospace' }
+        );
       }
 
-      drawModalLane(h * 0.38, s.r1, sys.w1, sys.zeta1, 'r₁', C.teal);
-      drawModalLane(h * 0.74, s.r2, sys.w2, sys.zeta2, 'r₂', C.crimson);
+      drawModalLane(h * 0.39, s.r1, sys.w1, sys.zeta1, '1', C.teal);
+      drawModalLane(h * 0.75, s.r2, sys.w2, sys.zeta2, '2', C.crimson);
     }
 
     function drawWaveCanvas() {

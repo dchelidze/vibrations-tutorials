@@ -754,11 +754,61 @@
     fmt
   };
 
+  /* ------------------------------------------------------------------
+   * Typographic Math Text Helper for Canvas (clean subscripts & superscripts)
+   * runs: array of { t: string, sub?: boolean, sup?: boolean, i?: boolean, bold?: boolean }
+   * ---------------------------------------------------------------- */
+  function measureMathRuns(ctx, runs, size, family) {
+    const fam = family || '"IBM Plex Sans", sans-serif';
+    const subSize = Math.max(8.5, size * 0.72);
+    let totalW = 0;
+    for (const r of runs) {
+      const sz = r.sub || r.sup ? subSize : size;
+      const wt = r.bold ? '600 ' : '500 ';
+      const st = r.i ? 'italic ' : '';
+      ctx.font = st + wt + sz + 'px ' + fam;
+      totalW += ctx.measureText(r.t).width;
+    }
+    return totalW;
+  }
+
+  function drawMath(ctx, runs, x, y, opts) {
+    const o = opts || {};
+    const size = o.size || 12;
+    const fam = o.family || '"IBM Plex Sans", sans-serif';
+    const align = o.align || 'left';
+    const baseline = o.baseline || 'middle';
+    const color = o.color || '#132433';
+    const subSize = Math.max(8.5, size * 0.72);
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = baseline;
+
+    const totalW = measureMathRuns(ctx, runs, size, fam);
+    let cx = align === 'center' ? x - totalW * 0.5 : align === 'right' ? x - totalW : x;
+
+    for (const r of runs) {
+      const sz = r.sub || r.sup ? subSize : size;
+      const wt = r.bold ? '600 ' : '500 ';
+      const st = r.i ? 'italic ' : '';
+      const dy = r.sub ? size * 0.28 : r.sup ? -size * 0.30 : 0;
+      ctx.font = st + wt + sz + 'px ' + fam;
+      ctx.fillText(r.t, cx, y + dy);
+      cx += ctx.measureText(r.t).width;
+    }
+    ctx.restore();
+    return totalW;
+  }
+
   window.VibLab.Theme = {
     get: getThemeColors,
     setupCanvas,
     drawArrow,
     drawSpring,
-    drawDamper
+    drawDamper,
+    measureMathRuns,
+    drawMath
   };
 })();

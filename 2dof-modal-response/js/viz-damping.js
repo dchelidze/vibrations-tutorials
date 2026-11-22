@@ -137,31 +137,54 @@
       drawAxisPair(eigC.v1, eigC.v2, ca1, ca2, sys.isProportional ? C.teal : C.crimson, true);
 
       // Mode axis labels
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.fillStyle = C.blue;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('v₁ (K̃ axis)', toX(sys.v1[0] * ka1) + 5, toY(sys.v1[1] * ka1) - 3);
+      Theme.drawMath(
+        ctx,
+        [{ t: 'v', bold: true }, { t: '1', sub: true, bold: true }, { t: ' (', bold: true }, { t: 'K̃', bold: true }, { t: ' axis)', bold: true }],
+        toX(sys.v1[0] * ka1) + 6,
+        toY(sys.v1[1] * ka1) - 8,
+        { size: 11.5, color: C.blue, align: 'left' }
+      );
 
-      // Status badge in top-left
-      const statusText = sys.isProportional
-        ? 'Axes aligned: Δθ = 0.0° (c̃₁₂ = 0, classical modes)'
-        : 'Axes misaligned: Δθ = ' + M.fmt(sys.dampMisalignDeg, 1) + '° (c̃₁₂ ≠ 0, complex modes)';
-      ctx.fillStyle = sys.isProportional ? C.teal : C.crimson;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(statusText, 12, 10);
+      // Status badge in top-left cleanly typeset
+      if (sys.isProportional) {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Axes aligned: Δθ = 0.0° (', bold: true },
+            { t: 'c̃', i: true, bold: true },
+            { t: '12', sub: true, bold: true },
+            { t: ' = 0, classical modes)', bold: true }
+          ],
+          12,
+          16,
+          { size: 11.5, color: C.teal, align: 'left' }
+        );
+      } else {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Axes misaligned: Δθ = ' + M.fmt(sys.dampMisalignDeg, 1) + '° (', bold: true },
+            { t: 'c̃', i: true, bold: true },
+            { t: '12', sub: true, bold: true },
+            { t: ' ≠ 0, complex modes)', bold: true }
+          ],
+          12,
+          16,
+          { size: 11.5, color: C.crimson, align: 'left' }
+        );
+      }
 
       // Axis names
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('q₁', w - 16, cy - 5);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('q₂', cx + 7, 28);
+      Theme.drawMath(ctx, [{ t: 'q', i: true, bold: true }, { t: '1', sub: true, bold: true }], w - 16, cy - 10, {
+        size: 11.5,
+        color: C.textMuted,
+        align: 'right'
+      });
+      Theme.drawMath(ctx, [{ t: 'q', i: true, bold: true }, { t: '2', sub: true, bold: true }], cx + 8, 34, {
+        size: 11.5,
+        color: C.textMuted,
+        align: 'left'
+      });
     }
 
     function drawCompareCanvas() {
@@ -223,18 +246,19 @@
         ctx.lineTo(padL + plotW, py);
         ctx.stroke();
 
-        ctx.fillStyle = C.textMuted;
-        ctx.font = '500 10px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('10^' + d, padL - 6, py);
+        Theme.drawMath(ctx, [{ t: '10' }, { t: String(d), sup: true }], padL - 7, py, {
+          size: 10.5,
+          color: C.textMuted,
+          align: 'right',
+          family: '"IBM Plex Mono", monospace'
+        });
       }
 
       // Vertical reference lines w1, w2
       [
-        [sys.w1, 'ω₁', C.teal],
-        [sys.w2, 'ω₂', C.crimson]
-      ].forEach(([wf, lbl, col]) => {
+        [sys.w1, '1', C.teal],
+        [sys.w2, '2', C.crimson]
+      ].forEach(([wf, idxStr, col]) => {
         const px = toX(wf);
         ctx.save();
         ctx.strokeStyle = col;
@@ -244,12 +268,12 @@
         ctx.moveTo(px, padT);
         ctx.lineTo(px, padT + plotH);
         ctx.stroke();
-        ctx.fillStyle = col;
-        ctx.font = '600 10.5px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(lbl, px, padT - 4);
         ctx.restore();
+        Theme.drawMath(ctx, [{ t: 'ω', bold: true }, { t: idxStr, sub: true, bold: true }], px, padT - 11, {
+          size: 11,
+          color: col,
+          align: 'center'
+        });
       });
 
       // Exact coupled FRF (solid blue)

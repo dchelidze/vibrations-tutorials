@@ -86,15 +86,9 @@
       ctx.lineTo(cx, h - 14);
       ctx.stroke();
 
-      // Axis labels
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(labelX, w - 16, cy - 6);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(labelY, cx + 8, 14);
+      // Axis labels (typeset math)
+      Theme.drawMath(ctx, labelX, w - 16, cy - 11, { size: 12, color: C.textMuted, align: 'right' });
+      Theme.drawMath(ctx, labelY, cx + 8, 20, { size: 12, color: C.textMuted, align: 'left' });
     }
 
     function drawPhysicalCanvas() {
@@ -116,7 +110,18 @@
       const toX = (x) => cx + x * scale;
       const toY = (y) => cy - y * scale;
 
-      drawGridAndAxes(ctx, w, h, cx, cy, scale, maxExtent, 'x₁', 'x₂', C);
+      drawGridAndAxes(
+        ctx,
+        w,
+        h,
+        cx,
+        cy,
+        scale,
+        maxExtent,
+        [{ t: 'x', i: true, bold: true }, { t: '1', sub: true, bold: true }],
+        [{ t: 'x', i: true, bold: true }, { t: '2', sub: true, bold: true }],
+        C
+      );
 
       // Optional stiffness ellipse x^T K x = w1^2 (scaled for clean visual reference)
       if (state.showStiffness) {
@@ -217,15 +222,16 @@
       Theme.drawArrow(ctx, cx, cy, toX(u1[0]), toY(u1[1]), C.teal, 2.4, 9);
       Theme.drawArrow(ctx, cx, cy, toX(u2[0]), toY(u2[1]), C.crimson, 2.4, 9);
 
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.fillStyle = C.teal;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('u₁', toX(u1[0]) + 6, toY(u1[1]) - 4);
-      ctx.fillStyle = C.crimson;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('u₂', toX(u2[0]) - 6, toY(u2[1]) - 4);
+      Theme.drawMath(ctx, [{ t: 'u', bold: true }, { t: '1', sub: true, bold: true }], toX(u1[0]) + 7, toY(u1[1]) - 8, {
+        size: 12.5,
+        color: C.teal,
+        align: 'left'
+      });
+      Theme.drawMath(ctx, [{ t: 'u', bold: true }, { t: '2', sub: true, bold: true }], toX(u2[0]) - 7, toY(u2[1]) - 8, {
+        size: 12.5,
+        color: C.crimson,
+        align: 'right'
+      });
 
       // Probe vector x0 and its M-orthogonal parallelogram decomposition: x0 = r1 u1 + r2 u2
       const x0 = state.x0;
@@ -296,18 +302,27 @@
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = C.copper;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('x₀ (drag)', toX(x0[0]) + 9, toY(x0[1]) - 6);
+      Theme.drawMath(
+        ctx,
+        [{ t: 'x', bold: true }, { t: '0', sub: true, bold: true }, { t: ' (drag)', bold: true }],
+        toX(x0[0]) + 10,
+        toY(x0[1]) - 6,
+        { size: 12, color: C.copper, align: 'left' }
+      );
 
-      // Corner badge
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 11px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('xᵀMx = 1 (ellipse)', 12, h - 10);
+      // Corner badge (NLD upright sans-serif transpose T)
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'x', bold: true },
+          { t: 'T', sup: true, bold: true },
+          { t: 'Mx', bold: true },
+          { t: ' = 1 (ellipse)' }
+        ],
+        12,
+        h - 14,
+        { size: 11, color: C.textMuted, align: 'left' }
+      );
     }
 
     function drawMassNormCanvas() {
@@ -328,7 +343,34 @@
       const toX = (x) => cx + x * scale;
       const toY = (y) => cy - y * scale;
 
-      drawGridAndAxes(ctx, w, h, cx, cy, scale, maxExtent, 'q₁ = √m₁ x₁', 'q₂ = √m₂ x₂', C);
+      drawGridAndAxes(
+        ctx,
+        w,
+        h,
+        cx,
+        cy,
+        scale,
+        maxExtent,
+        [
+          { t: 'q', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ' = √', bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ' x', i: true, bold: true },
+          { t: '1', sub: true, bold: true }
+        ],
+        [
+          { t: 'q', i: true, bold: true },
+          { t: '2', sub: true, bold: true },
+          { t: ' = √', bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: '2', sub: true, bold: true },
+          { t: ' x', i: true, bold: true },
+          { t: '2', sub: true, bold: true }
+        ],
+        C
+      );
 
       // Stiffness ellipse q^T Ktilde q = sqrt(lam1*lam2) aligned with v1, v2
       if (state.showStiffness) {
@@ -401,15 +443,16 @@
       Theme.drawArrow(ctx, cx, cy, toX(v1[0]), toY(v1[1]), C.teal, 2.4, 9);
       Theme.drawArrow(ctx, cx, cy, toX(v2[0]), toY(v2[1]), C.crimson, 2.4, 9);
 
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.fillStyle = C.teal;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('v₁', toX(v1[0]) + 6, toY(v1[1]) - 4);
-      ctx.fillStyle = C.crimson;
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('v₂', toX(v2[0]) - 6, toY(v2[1]) - 4);
+      Theme.drawMath(ctx, [{ t: 'v', bold: true }, { t: '1', sub: true, bold: true }], toX(v1[0]) + 7, toY(v1[1]) - 8, {
+        size: 12.5,
+        color: C.teal,
+        align: 'left'
+      });
+      Theme.drawMath(ctx, [{ t: 'v', bold: true }, { t: '2', sub: true, bold: true }], toX(v2[0]) - 7, toY(v2[1]) - 8, {
+        size: 12.5,
+        color: C.crimson,
+        align: 'right'
+      });
 
       // Exact orthogonal projection in q-space: r_j = v_j^T q0
       const r = M.physToModal(sys, state.x0);
@@ -456,17 +499,40 @@
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = C.copper;
-      ctx.font = '600 12px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('q₀ = M¹ᐟ²x₀', toX(q0[0]) + 9, toY(q0[1]) - 6);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'q', bold: true },
+          { t: '0', sub: true, bold: true },
+          { t: ' = ', bold: true },
+          { t: 'M', bold: true },
+          { t: '1/2', sup: true, bold: true },
+          { t: 'x', bold: true },
+          { t: '0', sub: true, bold: true }
+        ],
+        toX(q0[0]) + 10,
+        toY(q0[1]) - 6,
+        { size: 12, color: C.copper, align: 'left' }
+      );
 
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 11px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('qᵀq = 1 (circle) · v₁ᵀv₂ = 0', 12, h - 10);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'q', bold: true },
+          { t: 'T', sup: true, bold: true },
+          { t: 'q', bold: true },
+          { t: ' = 1 (circle) · ' },
+          { t: 'v', bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: 'T', sup: true, bold: true },
+          { t: 'v', bold: true },
+          { t: '2', sub: true, bold: true },
+          { t: ' = 0' }
+        ],
+        12,
+        h - 14,
+        { size: 11, color: C.textMuted, align: 'left' }
+      );
     }
 
     function render() {
