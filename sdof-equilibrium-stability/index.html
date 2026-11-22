@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Equilibrium Stability, Eigenvalues &amp; Phase Portraits (1-DOF) — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\lambda$</div>
+        <div>
+          <span class="brand-title">Equilibrium stability &amp; phase-plane geometry</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-state-space">1. State space</a>
+        <a href="#sec-eigen">2. Eigenvalues</a>
+        <a href="#sec-trdet">3. $(\tau, \Delta)$ plane</a>
+        <a href="#sec-geometry">4. Geometry</a>
+        <a href="#sec-nonlinear">5. Nonlinear bridge</a>
+        <a href="#sec-summary">6. Classification</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-params" class="btn-nav" type="button" title="Adjust trace and determinant live">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <circle cx="9" cy="7" r="2.2" fill="#132433"></circle>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+            <circle cx="15" cy="17" r="2.2" fill="#132433"></circle>
+          </svg>
+          <span>Parameters</span>
+        </button>
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING PARAMETERS DRAWER ===================== -->
+  <aside id="param-drawer" class="param-drawer" aria-label="Linearized 1-DOF parameters">
+    <div class="drawer-header">
+      <h3>Linearized 1-DOF invariants</h3>
+      <button id="btn-close-drawer" class="btn btn-sm" type="button" aria-label="Close parameters">Close</button>
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Trace $\tau = \operatorname{tr}(\mathbf{A}) = -c/m$</span>
+        <span class="param-val" id="val-tau">-0.80 s⁻¹</span>
+      </div>
+      <input id="slider-tau" class="range-teal" type="range" min="-4.2" max="4.2" step="0.05" value="-0.8" />
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head">
+        <span>Determinant $\Delta = \det(\mathbf{A}) = k/m$</span>
+        <span class="param-val" id="val-delta">2.25 s⁻²</span>
+      </div>
+      <input id="slider-delta" class="range-copper" type="range" min="-3.0" max="5.0" step="0.05" value="2.25" />
+    </div>
+
+    <div class="preset-chips" id="drawer-presets">
+      <button class="btn btn-sm" data-preset="stable_spiral" type="button">Stable spiral</button>
+      <button class="btn btn-sm" data-preset="stable_node" type="button">Stable node</button>
+      <button class="btn btn-sm" data-preset="degenerate_stable" type="button">Improper stable</button>
+      <button class="btn btn-sm" data-preset="star_stable" type="button">Stable star ($\mathbf{A}=\lambda\mathbf{I}$)</button>
+      <button class="btn btn-sm" data-preset="center" type="button">Center ($\tau=0$)</button>
+      <button class="btn btn-sm" data-preset="saddle" type="button">Saddle ($\Delta&lt;0$)</button>
+      <button class="btn btn-sm" data-preset="unstable_spiral" type="button">Unstable spiral</button>
+      <button class="btn btn-sm" data-preset="unstable_node" type="button">Unstable node</button>
+      <button class="btn btn-sm" data-preset="degenerate_unstable" type="button">Improper unstable</button>
+      <button class="btn btn-sm" data-preset="star_unstable" type="button">Unstable star ($\mathbf{A}=\lambda\mathbf{I}$)</button>
+      <button class="btn btn-sm" data-preset="zero_det" type="button">Non-isolated ($\Delta=0$)</button>
+    </div>
+  </aside>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 03</div>
+      <div class="copper-bar"></div>
+      <h1>Equilibrium stability, eigenvalues, and phase portraits of 1-DOF systems</h1>
+      <p class="hero-lead">
+        Near an equilibrium position, a one-degree-of-freedom mechanical system reduces to a two-dimensional linear
+        flow $\dot{\mathbf{z}} = \mathbf{A}\mathbf{z}$ governed entirely by two matrix invariants: the
+        <span class="c-teal-hero">trace $\tau = \operatorname{tr}(\mathbf{A}) = -c/m$</span> and the
+        <span class="c-orange-hero">determinant $\Delta = \det(\mathbf{A}) = k/m$</span>. We show how the
+        <span class="c-blue-hero">characteristic values $\lambda_{1,2}$</span> and eigenvectors determine every
+        possible phase portrait, why $(\tau, \Delta)$ organizes all stability transitions geometrically, and where
+        linearization succeeds or fails in nonlinear mechanical systems.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select equilibrium regime">
+          <button class="pill active" data-preset="stable_spiral" type="button">Stable spiral</button>
+          <button class="pill" data-preset="stable_node" type="button">Stable node</button>
+          <button class="pill" data-preset="degenerate_stable" type="button">Improper node</button>
+          <button class="pill" data-preset="star_stable" type="button">Stable star</button>
+          <button class="pill" data-preset="center" type="button">Center</button>
+          <button class="pill" data-preset="saddle" type="button">Saddle</button>
+          <button class="pill" data-preset="unstable_spiral" type="button">Unstable spiral</button>
+          <button class="pill" data-preset="unstable_node" type="button">Unstable node</button>
+          <button class="pill" data-preset="star_unstable" type="button">Unstable star</button>
+          <button class="pill" data-preset="zero_det" type="button">$\Delta = 0$</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: 1-DOF MECHANICS TO STATE-SPACE INVARIANTS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-state-space">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Linearization &amp; mechanical meaning</span>
+        <h2>1. Trace and determinant encode dissipation and potential curvature</h2>
+        <p>
+          Linearizing a 1-DOF mechanical system $m\ddot{q} + g(q,\dot{q}) = 0$ about an equilibrium $(q^*, 0)$ gives
+          $m\ddot{x} + c\dot{x} + kx = 0$, where $x = q - q^*$ is the small perturbation, $k = \partial g/\partial q = V''(q^*)$
+          is the local effective stiffness, and $c = \partial g/\partial \dot{q}$ is the effective damping coefficient.
+          Unlike a passive classroom spring, $k$ and $c$ can be positive, zero, or negative (inverted pendula, buckled
+          beams, or self-excited flutter).
+        </p>
+      </div>
+
+      <div class="grid-main-side">
+        <div class="card">
+          <div class="canvas-box h-potential">
+            <canvas id="mech-pot-canvas"></canvas>
+          </div>
+          <div class="controls-row">
+            <div class="controls-group">
+              <button id="btn-mech-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+              <button id="btn-mech-reset" class="btn btn-sm" type="button">Reset $x_0 = 1,\; v_0 = 0$</button>
+              <button id="btn-open-params-sec1" class="btn btn-sm" type="button">Tune $\tau, \Delta$</button>
+            </div>
+            <span style="font-family: var(--font-sans); font-size: 12px; color: var(--text-muted);">
+              Drag the bead horizontally to perturb the equilibrium
+            </span>
+          </div>
+          <div class="canvas-box h-wave" style="margin-top: 12px;">
+            <canvas id="mech-wave-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 8px; font-size: 16px;">First-order companion state-space form</h3>
+          <div class="eq-box">
+            $$\ddot{x} - \tau\dot{x} + \Delta x = 0 \quad\Longleftrightarrow\quad
+              \begin{bmatrix}\dot{x} \\ \dot{v}\end{bmatrix}
+              = \begin{bmatrix}0 & 1 \\ -\Delta & \tau\end{bmatrix}
+                \begin{bmatrix}x \\ v\end{bmatrix}$$
+          </div>
+
+          <div class="eq-stack" id="live-matrix-eqs"></div>
+
+          <p style="margin: 8px 0 0; font-size: 13px; color: var(--text-muted);">
+            <strong>Mechanical reading:</strong> $\Delta = k/m = V''(q^*)/m$ measures the local curvature of the
+            potential energy $V(x) = \tfrac{1}{2}\Delta x^2$. The trace $\tau = -c/m$ sets the energy rate
+            $\dot{E} = \tau v^2$: negative $\tau$ removes energy, $\tau = 0$ conserves it, and positive $\tau$ injects it.
+          </p>
+
+          <div class="kpi-grid">
+            <div class="kpi kpi-teal" id="kpi-stability-box">
+              <div class="kpi-label">Lyapunov stability</div>
+              <div class="kpi-val c-teal" id="kpi-stability"></div>
+              <div class="kpi-sub" id="kpi-stability-sub"></div>
+            </div>
+            <div class="kpi kpi-blue">
+              <div class="kpi-label">Equilibrium type</div>
+              <div class="kpi-val c-blue" id="kpi-regime"></div>
+              <div class="kpi-sub" id="kpi-regime-sub"></div>
+            </div>
+            <div class="kpi kpi-orange">
+              <div class="kpi-label">Characteristic values</div>
+              <div class="kpi-val c-orange" id="kpi-eigs"></div>
+              <div class="kpi-sub" id="kpi-vieta"></div>
+            </div>
+            <div class="kpi kpi-purple">
+              <div class="kpi-label">Physical landscape</div>
+              <div class="kpi-val c-purple" id="kpi-mech"></div>
+              <div class="kpi-sub" id="kpi-mech-sub"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: CHARACTERISTIC EQUATION, EIGENVALUES & PHASE PORTRAIT
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-eigen">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Characteristic equation &amp; eigenvalue problem</span>
+        <h2>2. Characteristic values set growth rates; eigenvectors set invariant directions</h2>
+        <p>
+          Seeking straight-line exponential solutions $\mathbf{z}(t) = \mathbf{v}\mathrm{e}^{\lambda t}$ converts
+          $\dot{\mathbf{z}} = \mathbf{A}\mathbf{z}$ into the algebraic eigenvalue problem
+          $\mathbf{A}\mathbf{v} = \lambda\mathbf{v}$. Nontrivial solutions exist if and only if $\lambda$ satisfies
+          the quadratic characteristic equation $\det(\mathbf{A} - \lambda\mathbf{I}) = 0$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$\det(\mathbf{A} - \lambda\mathbf{I}) = \lambda^2 - \tau\lambda + \Delta = 0
+            \quad\Longrightarrow\quad
+            \lambda_{1,2} = \frac{\tau \pm \sqrt{\tau^2 - 4\Delta}}{2},
+            \qquad
+            \mathbf{v}_i = \begin{bmatrix}1 \\ \lambda_i\end{bmatrix}$$
+        </div>
+
+        <div class="kpi-grid-3" style="margin-top: 8px; margin-bottom: 14px;">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Current characteristic equation</div>
+            <div class="kpi-val c-blue" id="sec2-char-eq"></div>
+            <div class="kpi-sub">Vieta identities: $\tau = \lambda_1 + \lambda_2$, $\Delta = \lambda_1\lambda_2$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Characteristic values (eigenvalues)</div>
+            <div class="kpi-val c-orange" id="sec2-roots"></div>
+            <div class="kpi-sub">Stability requires $\operatorname{Re}(\lambda_i) &lt; 0$ for asymptotic decay</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Eigenvector geometry</div>
+            <div class="kpi-val c-teal" id="sec2-eigvecs"></div>
+            <div class="kpi-sub">In the $(x, v)$ plane, real eigenvector slope is literally $v/x = \lambda_i$</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex $\lambda$-plane (eigenvalues &amp; root locus)</strong>
+              <span>Dashed circle: $|\lambda| = \sqrt{\Delta}$ as $\tau$ varies</span>
+            </div>
+            <div class="canvas-box h-eigen">
+              <canvas id="eigen-plane-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Phase portrait in $(x, v)$ state space</strong>
+              <span id="probe-ic-readout" style="font-family: var(--font-mono); color: var(--copper-deep);">
+                z₀ = [1.45, 0.55]ᵀ
+              </span>
+            </div>
+            <div class="canvas-box h-phase">
+              <canvas id="phase-portrait-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <label class="checkbox-label">
+              <input id="chk-eigen" type="checkbox" checked />
+              <span>Eigendirections / invariant basis</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="chk-nullclines" type="checkbox" checked />
+              <span>Nullclines ($\dot{x}=0$, $\dot{v}=0$)</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="chk-field" type="checkbox" checked />
+              <span>Direction field</span>
+            </label>
+          </div>
+          <div class="controls-group">
+            <button id="btn-reset-probe" class="btn btn-sm" type="button">Reset probe $\mathbf{z}_0$</button>
+          </div>
+        </div>
+
+        <div class="legend-bar">
+          <span class="legend-item"><span class="legend-line" style="background: var(--c-teal);"></span>Slow / stable eigendirection $\mathbf{v}_1$ ($E^{\mathrm{s}}$)</span>
+          <span class="legend-item"><span class="legend-line" style="background: var(--c-crimson);"></span>Fast / unstable eigendirection $\mathbf{v}_2$ ($E^{\mathrm{u}}$)</span>
+          <span class="legend-item"><span class="legend-line dashed" style="border-color: var(--c-amber);"></span>$\dot{v}=0$ nullcline ($v = (\Delta/\tau)x$)</span>
+          <span class="legend-item"><span class="legend-line" style="background: var(--copper);"></span>Interactive probe trajectory</span>
+        </div>
+
+        <div class="callout callout-teal" id="sec2-callout"></div>
+
+        <details class="adv-note" open>
+          <summary><span>Repeated roots on $\Delta = \tau^2/4$: Star (proper) node vs. improper (Jordan) node</span></summary>
+          <div class="adv-body">
+            <p>
+              When $D = \tau^2 - 4\Delta = 0$ and $\tau \ne 0$, the characteristic equation has a repeated nonzero real
+              root $\lambda_1 = \lambda_2 = \lambda = \tau/2$ (algebraic multiplicity $m_{\mathrm{a}} = 2$). The pair
+              $(\tau, \Delta)$ alone does <em>not</em> distinguish the two possible phase portraits on the parabola — the
+              rank of $\mathbf{A} - \lambda\mathbf{I}$ (equivalently, geometric multiplicity
+              $m_{\mathrm{g}} = 2 - \operatorname{rank}(\mathbf{A} - \lambda\mathbf{I})$) decides:
+            </p>
+            <div class="grid-2" style="margin-top: 10px;">
+              <div class="card" style="padding: 12px 14px;">
+                <strong style="font-family: var(--font-sans); font-size: 13px; color: var(--c-teal);">
+                  Star (proper / dicritical) node: $m_{\mathrm{g}} = 2$
+                </strong>
+                <p style="margin: 6px 0 0; font-size: 13.5px;">
+                  <strong>Exact conditions:</strong> $\Delta = \tau^2/4 &gt; 0$ <em>and</em>
+                  $\mathbf{A} = \lambda\mathbf{I} = \begin{bmatrix}\lambda &amp; 0 \\ 0 &amp; \lambda\end{bmatrix}$
+                  ($\operatorname{rank}(\mathbf{A} - \lambda\mathbf{I}) = 0$).
+                  <strong>Stable star</strong> if $\tau &lt; 0$ ($\lambda &lt; 0$); <strong>unstable star</strong> if
+                  $\tau &gt; 0$ ($\lambda &gt; 0$). Every nonzero vector is an eigenvector and
+                  $\mathbf{z}(t) = \mathrm{e}^{\lambda t}\mathbf{z}_0$ moves strictly along straight radial rays.
+                </p>
+              </div>
+              <div class="card" style="padding: 12px 14px;">
+                <strong style="font-family: var(--font-sans); font-size: 13px; color: var(--copper-deep);">
+                  Improper (degenerate / Jordan) node: $m_{\mathrm{g}} = 1$
+                </strong>
+                <p style="margin: 6px 0 0; font-size: 13.5px;">
+                  <strong>Exact conditions:</strong> $\Delta = \tau^2/4 &gt; 0$ <em>and</em> $\mathbf{A} \ne \lambda\mathbf{I}$
+                  ($\operatorname{rank}(\mathbf{A} - \lambda\mathbf{I}) = 1$). Every critically damped 1-DOF mechanical
+                  oscillator falls here because $\dot{x} = v$ fixes $A_{12} = 1 \ne 0$, leaving one eigendirection
+                  $\mathbf{v}_1 = [1, \lambda]^{\mathsf{T}}$ and secular shear $t\mathrm{e}^{\lambda t}$.
+                </p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: THE POINCARÉ TRACE-DETERMINANT PLANE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-trdet">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · The $(\tau, \Delta)$ stability map</span>
+        <h2>3. Every qualitative change happens across three curves in the $(\tau, \Delta)$ plane</h2>
+        <p>
+          Because $\lambda_{1,2}$ depend only on $\tau$ and $\Delta$, all 1-DOF linear phase portraits live on one
+          two-dimensional map. Drag the copper handle anywhere on the $(\tau, \Delta)$ plane below, or run a
+          one-parameter sweep to watch the phase portrait morph across the parabola $\Delta = \tau^2/4$, the
+          center boundary $\tau = 0$, and the static buckling line $\Delta = 0$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 12px;">
+          <div class="controls-group">
+            <span class="status-badge ok" id="trdet-badge">Stable spiral</span>
+            <span id="trdet-live-coords" style="font-size: 13.5px;"></span>
+          </div>
+          <div class="controls-group">
+            <div class="controls-group" id="sweep-btns">
+              <button class="btn btn-sm" data-sweep="tau_fixed_delta" type="button">Sweep $\tau$ ($\Delta = 2.25$)</button>
+              <button class="btn btn-sm" data-sweep="delta_fixed_tau" type="button">Sweep $\Delta$ ($\tau = -2.2$)</button>
+              <button class="btn btn-sm" data-sweep="conservative" type="button">Conservative ($\tau = 0$)</button>
+            </div>
+            <div class="controls-group" style="border-left: 1px solid var(--border); padding-left: 8px;">
+              <button id="btn-parabola-improper" class="btn btn-sm" type="button" title="Snap to parabola with mechanical matrix A12=1">Improper ($A_{12}=1$)</button>
+              <button id="btn-parabola-star" class="btn btn-sm" type="button" title="Snap to parabola with scalar matrix A=lambda*I">Star ($\mathbf{A}=\lambda\mathbf{I}$)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-main-side">
+          <div class="canvas-box h-trdet">
+            <canvas id="trdet-plane-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-trdet">
+            <canvas id="trdet-phase-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 14px;">
+          <div class="card-subtle">
+            <strong style="font-family: var(--font-sans); font-size: 13px; color: var(--c-purple);">
+              1. Crossing $\Delta = 0$ (static loss of stability)
+            </strong>
+            <p style="margin: 6px 0 0; font-size: 13.5px; color: var(--text-muted);">
+              One real eigenvalue passes through $\lambda = 0$. A potential well flattens and inverts into a hilltop,
+              turning a node into a saddle — the linear signature of static buckling (pitchfork or saddle-node bifurcation).
+            </p>
+          </div>
+          <div class="card-subtle">
+            <strong style="font-family: var(--font-sans); font-size: 13px; color: var(--c-amber);">
+              2. Crossing $\tau = 0$ with $\Delta &gt; 0$ (dynamic loss of stability)
+            </strong>
+            <p style="margin: 6px 0 0; font-size: 13.5px; color: var(--text-muted);">
+              A complex-conjugate pair crosses the imaginary axis at $\pm\mathrm{i}\sqrt{\Delta}$. Damping reverses
+              sign from dissipation to energy injection — the linear mechanism behind aeroelastic flutter and Hopf bifurcation.
+            </p>
+          </div>
+          <div class="card-subtle">
+            <strong style="font-family: var(--font-sans); font-size: 13px; color: var(--copper-deep);">
+              3. Crossing $\Delta = \tau^2/4$ (oscillatory transition)
+            </strong>
+            <p style="margin: 6px 0 0; font-size: 13.5px; color: var(--text-muted);">
+              Two real roots collide at $\lambda = \tau/2$ and split into a complex-conjugate pair. Stability does
+              not change, but the two real eigendirections vanish and trajectories switch from non-oscillatory nodes to spirals.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: GEOMETRIC INSIGHTS (LIOUVILLE AREA + MODAL COORDINATES)
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-geometry">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Geometric insights</span>
+        <h2>4. Phase-space area, coordinate straightening, and why trajectories bend</h2>
+        <p>
+          Algebraic formulas tell us when trajectories decay; geometry shows us <em>how</em> the entire phase plane
+          deforms as a fluid. Scrub the flow time $t$ below to watch a patch of initial conditions evolve under
+          $\mathbf{z}(t) = \mathrm{e}^{\mathbf{A}t}\mathbf{z}(0)$ in both physical coordinates $(x, v)$ and canonical
+          modal coordinates $(y_1, y_2)$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div class="canvas-box h-geom">
+            <canvas id="geom-area-canvas"></canvas>
+          </div>
+          <div class="canvas-box h-geom">
+            <canvas id="geom-modal-canvas"></canvas>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <button id="btn-geom-play" class="btn btn-sm btn-primary" type="button">Animate flow</button>
+          <label for="slider-geom-t">Flow time $t$</label>
+          <input id="slider-geom-t" class="range-copper" type="range" min="0" max="2.6" step="0.02" value="0.65" />
+          <span class="scrubber-val" id="val-geom-t">t = 0.65 s</span>
+          <div class="controls-group" id="geom-shape-btns">
+            <button class="btn btn-sm is-active" data-shape="square" type="button">Square patch</button>
+            <button class="btn btn-sm" data-shape="circle" type="button">Circular patch</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top: 12px;">
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Liouville area law</div>
+            <div class="kpi-val c-orange" id="kpi-liouville"></div>
+            <div class="kpi-sub" id="kpi-liouville-sub"></div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Coordinate map $\mathbf{z} = \mathbf{P}\mathbf{y}$</div>
+            <div class="kpi-val c-blue">Affine straightening of the flow</div>
+            <div class="kpi-sub">Skewed eigenvectors become orthogonal axes; elliptical spirals become pure circular spirals</div>
+          </div>
+        </div>
+
+        <div class="grid-4" style="margin-top: 16px;">
+          <div class="insight-card accent-teal">
+            <h4>Trace = phase-area divergence</h4>
+            <p>
+              The vector field divergence is $\nabla\cdot(\mathbf{A}\mathbf{z}) = \operatorname{tr}(\mathbf{A}) = \tau$.
+              By Liouville’s formula, every phase patch scales in area strictly as $S(t) = S(0)\mathrm{e}^{\tau t}$ —
+              even on a conservative saddle ($\tau = 0, \Delta &lt; 0$), stretching along $E^{\mathrm{u}}$ is exactly
+              balanced by squeezing along $E^{\mathrm{s}}$.
+            </p>
+          </div>
+          <div class="insight-card accent-blue">
+            <h4>Eigenvector slope equals $\lambda_i$</h4>
+            <p>
+              Because $\dot{x} = v$, any straight invariant trajectory $v(t) = m x(t)$ satisfies
+              $\dot{x} = m x \implies x(t) = x_0\mathrm{e}^{mt}$. Therefore the slope $m$ of an invariant line in the
+              $(x, v)$ phase plane must equal its eigenvalue $\lambda_i$: steeper lines correspond to faster rates.
+            </p>
+          </div>
+          <div class="insight-card accent-copper">
+            <h4>Why nodes hug the slow axis</h4>
+            <p>
+              In eigen-coordinates $(y_1, y_2)$, $y_1(t) = y_{10}\mathrm{e}^{\lambda_1 t}$ and
+              $y_2(t) = y_{20}\mathrm{e}^{\lambda_2 t}$, eliminating $t$ gives $y_2 = C|y_1|^{\lambda_2/\lambda_1}$.
+              When $|\lambda_2| &gt; |\lambda_1|$, the exponent exceeds $1$, forcing all curves to arrive tangent to the
+              slow $y_1$-axis.
+            </p>
+          </div>
+          <div class="insight-card accent-crimson">
+            <h4>Why spirals rotate clockwise</h4>
+            <p>
+              In the upper half-plane ($v &gt; 0$), $\dot{x} = v &gt; 0$ pushes every trajectory strictly to the right;
+              in the lower half-plane ($v &lt; 0$), $\dot{x} &lt; 0$ pushes it strictly to the left. Thus every 1-DOF
+              mechanical spiral or center in $(x, \dot{x})$ coordinates must circulate clockwise.
+            </p>
+          </div>
+        </div>
+
+        <details class="adv-note">
+          <summary>Advanced geometric note: Abel–Jacobi–Liouville identity and the circle of roots</summary>
+          <div class="adv-body">
+            <p>
+              For any linear flow $\dot{\mathbf{z}} = \mathbf{A}\mathbf{z}$, the state transition matrix
+              $\mathbf{\Phi}(t) = \mathrm{e}^{\mathbf{A}t}$ maps an infinitesimal area element $\mathrm{d}x_0\,\mathrm{d}v_0$
+              to $\det(\mathrm{e}^{\mathbf{A}t})\,\mathrm{d}x_0\,\mathrm{d}v_0$. Using Jacobi’s identity
+              $\det(\mathrm{e}^{\mathbf{A}t}) = \mathrm{e}^{\operatorname{tr}(\mathbf{A})t} = \mathrm{e}^{\tau t}$, we
+              obtain $S(t) = S(0)\mathrm{e}^{\tau t}$ for any measurable region $S(0)$ in the phase plane.
+            </p>
+            <p>
+              In the complex $\lambda$-plane (Section 2), hold stiffness $\Delta &gt; 0$ fixed and vary damping $\tau$.
+              While $|\tau| &lt; 2\sqrt{\Delta}$, the complex roots satisfy
+              $|\lambda|^2 = \lambda_1\lambda_2 = \Delta$, so $\lambda_{1,2}$ travel along the exact circle of radius
+              $\sqrt{\Delta}$ centered at the origin, meet on the real axis at $\pm\sqrt{\Delta}$ when $|\tau| = 2\sqrt{\Delta}$,
+              and then split along the real axis as reciprocal partners $\lambda_1\lambda_2 = \Delta$.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: NONLINEAR 1-DOF BRIDGE & HARTMAN-GROBMAN LIMITS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-nonlinear">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Nonlinear 1-DOF bridge &amp; limits of linearization</span>
+        <h2>5. Linearization predicts hyperbolic equilibria locally, but fails at non-hyperbolic centers</h2>
+        <p>
+          Real mechanical systems can possess multiple equilibria simultaneously — potential wells alongside inverted
+          hilltops — and nonlinear restoring or damping terms. Select a nonlinear 1-DOF system below, click any
+          equilibrium marker to compare the true nonlinear flow against its local Jacobian $\mathbf{J}(x^*)$, or click
+          anywhere in the phase portrait to launch a trajectory.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 12px;">
+          <div class="pill-group" id="nl-model-pills" role="tablist" aria-label="Select nonlinear 1-DOF model">
+            <button class="pill active" data-model="duffing" type="button">Double-well Duffing</button>
+            <button class="pill" data-model="pendulum" type="button">Damped pendulum</button>
+            <button class="pill" data-model="nl_center" type="button">Non-hyperbolic center test</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-nl-clear" class="btn btn-sm" type="button">Clear trajectories</button>
+          </div>
+        </div>
+
+        <div class="eq-box" id="nl-eq-box" style="margin-bottom: 12px;"></div>
+
+        <div class="scrubber-bar" style="margin-top: 0; margin-bottom: 14px;">
+          <label for="slider-nl-param" id="nl-param-label">Damping γ</label>
+          <input id="slider-nl-param" class="range-teal" type="range" min="-0.4" max="1.8" step="0.05" value="0.3" />
+          <span class="scrubber-val" id="nl-param-val">0.30</span>
+          <div class="controls-group" id="nl-eq-buttons"></div>
+        </div>
+
+        <div class="grid-main-side">
+          <div>
+            <div class="canvas-box h-nl-pot" style="border-bottom: none;">
+              <canvas id="nl-pot-canvas"></canvas>
+            </div>
+            <div class="canvas-box h-nl-phase">
+              <canvas id="nl-phase-canvas"></canvas>
+            </div>
+            <div class="legend-bar" id="nl-legend-bar">
+              <span class="legend-item nl-saddle-legend"><span class="legend-line" style="background: var(--c-teal);"></span>Saddle stable manifold $W^{\mathrm{s}}$ (basin boundary)</span>
+              <span class="legend-item nl-saddle-legend"><span class="legend-line" style="background: var(--c-crimson);"></span>Saddle unstable manifold $W^{\mathrm{u}}$</span>
+              <span class="legend-item"><span class="legend-line" style="background: var(--copper);"></span>Click to launch trajectory</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-box h-nl-local">
+              <canvas id="nl-local-canvas"></canvas>
+            </div>
+
+            <div class="card-subtle" style="margin-top: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                <strong style="font-family: var(--font-sans); font-size: 13px;">Local Jacobian at $x^*$</strong>
+                <span class="status-badge ok" id="nl-hg-badge">Hyperbolic</span>
+              </div>
+              <div id="nl-jacobian-tex" style="overflow-x: auto; padding: 4px 0;"></div>
+            </div>
+
+            <div class="callout callout-teal" id="nl-eq-note"></div>
+          </div>
+        </div>
+
+        <details class="adv-note">
+          <summary>Advanced geometric note: Hartman–Grobman theorem and Lyapunov’s direct method</summary>
+          <div class="adv-body">
+            <p>
+              An equilibrium $\mathbf{z}^*$ is <strong>hyperbolic</strong> when no eigenvalue of the Jacobian
+              $\mathbf{J}(\mathbf{z}^*)$ lies on the imaginary axis ($\operatorname{Re}(\lambda_i) \ne 0$). The
+              <strong>Hartman–Grobman theorem</strong> proves that near a hyperbolic equilibrium, the nonlinear flow is
+              locally topologically conjugate (smoothly deformable) to its linearized flow $\dot{\delta\mathbf{z}} = \mathbf{J}(\mathbf{z}^*)\delta\mathbf{z}$.
+            </p>
+            <p>
+              When $\operatorname{Re}(\lambda_i) = 0$ — specifically at a linear center ($\tau = 0, \Delta &gt; 0$) or a
+              zero-eigenvalue bifurcation ($\Delta = 0$) — the linearization sits on a stability boundary and is
+              <strong>structurally unstable</strong>. Arbitrarily small nonlinear terms determine true stability, as
+              seen in the <em>Non-hyperbolic center test</em> ($\ddot{x} + \beta x^2\dot{x} + x = 0$). There, the
+              quadratic Lyapunov candidate $E(x, v) = \tfrac{1}{2}(x^2 + v^2)$ satisfies $\dot{E} = -\beta x^2 v^2$,
+              proving asymptotic stability for $\beta &gt; 0$ and instability for $\beta &lt; 0$ even though
+              $\mathbf{J}(\mathbf{0})$ has purely imaginary eigenvalues $\pm\mathrm{i}$ for every $\beta$.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: CLASSIFICATION TABLE, WORKFLOW & REPRODUCIBLE CODE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Reference classification &amp; verification</span>
+        <h2>6. Complete stability classification and reproducible scripts</h2>
+        <p>
+          Click any row in the reference table below to jump directly to that equilibrium regime in the interactive
+          Poincaré diagram, or copy the live MATLAB and Python scripts populated with your current $(\tau, \Delta)$ values.
+        </p>
+      </div>
+
+      <div class="card" style="margin-bottom: 18px;">
+        <h3 style="margin: 0 0 6px; font-size: 16px;">Complete classification of 1-DOF linearized equilibria</h3>
+        <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+          Invariants for $\mathbf{A} = \begin{bmatrix}0 &amp; 1 \\ -\Delta &amp; \tau\end{bmatrix}$ with discriminant $D = \tau^2 - 4\Delta$. Click a row to load its preset.
+        </p>
+
+        <div class="table-wrap">
+          <table class="nld-table" id="class-table">
+            <thead>
+              <tr>
+                <th>Equilibrium type</th>
+                <th>Invariants $(\tau, \Delta, D)$</th>
+                <th>Eigenvalues $\lambda_{1,2}$</th>
+                <th>Phase portrait geometry</th>
+                <th>Stability &amp; hyperbolicity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="clickable-row" data-regime="stable_spiral" data-preset="stable_spiral">
+                <td><span class="swatch" style="background: var(--c-teal);"></span><strong>Stable spiral</strong></td>
+                <td>$\tau &lt; 0,\; \Delta &gt; 0,\; D &lt; 0$</td>
+                <td>$\sigma \pm \mathrm{i}\omega,\; \sigma &lt; 0$</td>
+                <td>Clockwise inward spirals; no real invariant lines</td>
+                <td>Asymptotically stable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="stable_node" data-preset="stable_node">
+                <td><span class="swatch" style="background: var(--c-blue);"></span><strong>Stable node</strong></td>
+                <td>$\tau &lt; 0,\; 0 &lt; \Delta &lt; \tau^2/4$</td>
+                <td>$\lambda_2 &lt; \lambda_1 &lt; 0$</td>
+                <td>Non-oscillatory decay tangent to slow eigenvector $\mathbf{v}_1$</td>
+                <td>Asymptotically stable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="degenerate_stable" data-preset="degenerate_stable">
+                <td><span class="swatch" style="background: var(--copper);"></span><strong>Improper stable node</strong></td>
+                <td>$\tau &lt; 0,\; \Delta = \tau^2/4,\; \mathbf{A} \ne \lambda\mathbf{I}$</td>
+                <td>$\lambda_1 = \lambda_2 = \tau/2 &lt; 0$ ($m_{\mathrm{g}}=1$)</td>
+                <td>Single eigendirection $[1, \tau/2]^{\mathsf{T}}$ with inward Jordan shear ($A_{12}=1$)</td>
+                <td>Asymptotically stable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="star_stable" data-preset="star_stable">
+                <td><span class="swatch" style="background: var(--c-teal);"></span><strong>Stable star node (proper)</strong></td>
+                <td>$\tau &lt; 0,\; \Delta = \tau^2/4,\; \mathbf{A} = (\tau/2)\mathbf{I}$</td>
+                <td>$\lambda_1 = \lambda_2 = \tau/2 &lt; 0$ ($m_{\mathrm{g}}=2$)</td>
+                <td>Pure inward radial rays in every direction (non-companion, $A_{12}=0$)</td>
+                <td>Asymptotically stable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="center" data-preset="center">
+                <td><span class="swatch" style="background: var(--c-amber);"></span><strong>Center</strong></td>
+                <td>$\tau = 0,\; \Delta &gt; 0,\; D &lt; 0$</td>
+                <td>$\pm\mathrm{i}\sqrt{\Delta}$</td>
+                <td>Nested clockwise ellipses; area-preserving conservative flow</td>
+                <td>Lyapunov stable · Non-hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="saddle" data-preset="saddle">
+                <td><span class="swatch" style="background: var(--c-purple);"></span><strong>Saddle point</strong></td>
+                <td>$\text{Any }\tau,\; \Delta &lt; 0,\; D &gt; 0$</td>
+                <td>$\lambda_1 &lt; 0 &lt; \lambda_2$</td>
+                <td>Hyperbolic flow; stable manifold $E^{\mathrm{s}}$ &amp; unstable $E^{\mathrm{u}}$</td>
+                <td>Unstable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="unstable_spiral" data-preset="unstable_spiral">
+                <td><span class="swatch" style="background: var(--c-crimson);"></span><strong>Unstable spiral</strong></td>
+                <td>$\tau &gt; 0,\; \Delta &gt; 0,\; D &lt; 0$</td>
+                <td>$\sigma \pm \mathrm{i}\omega,\; \sigma &gt; 0$</td>
+                <td>Clockwise expanding spirals (flutter / self-excitation)</td>
+                <td>Unstable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="unstable_node" data-preset="unstable_node">
+                <td><span class="swatch" style="background: var(--c-orange);"></span><strong>Unstable node</strong></td>
+                <td>$\tau &gt; 0,\; 0 &lt; \Delta &lt; \tau^2/4$</td>
+                <td>$0 &lt; \lambda_1 &lt; \lambda_2$</td>
+                <td>Diverging curves asymptotically parallel to fast eigenvector $\mathbf{v}_2$</td>
+                <td>Unstable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="degenerate_unstable" data-preset="degenerate_unstable">
+                <td><span class="swatch" style="background: var(--copper);"></span><strong>Improper unstable node</strong></td>
+                <td>$\tau &gt; 0,\; \Delta = \tau^2/4,\; \mathbf{A} \ne \lambda\mathbf{I}$</td>
+                <td>$\lambda_1 = \lambda_2 = \tau/2 &gt; 0$ ($m_{\mathrm{g}}=1$)</td>
+                <td>Single eigendirection $[1, \tau/2]^{\mathsf{T}}$ with outward Jordan shear ($A_{12}=1$)</td>
+                <td>Unstable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="star_unstable" data-preset="star_unstable">
+                <td><span class="swatch" style="background: var(--c-crimson);"></span><strong>Unstable star node (proper)</strong></td>
+                <td>$\tau &gt; 0,\; \Delta = \tau^2/4,\; \mathbf{A} = (\tau/2)\mathbf{I}$</td>
+                <td>$\lambda_1 = \lambda_2 = \tau/2 &gt; 0$ ($m_{\mathrm{g}}=2$)</td>
+                <td>Pure outward radial rays in every direction (non-companion, $A_{12}=0$)</td>
+                <td>Unstable · Hyperbolic</td>
+              </tr>
+              <tr class="clickable-row" data-regime="line_stable" data-preset="zero_det">
+                <td><span class="swatch" style="background: var(--c-ref);"></span><strong>Line of equilibria</strong></td>
+                <td>$\Delta = 0,\; \tau \ne 0$</td>
+                <td>$\lambda_1 = 0,\; \lambda_2 = \tau$</td>
+                <td>All points on $v = 0$ are equilibria; parallel flow of slope $\tau$</td>
+                <td>Non-isolated · Non-hyperbolic</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Step-by-step stability analysis workflow</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Locate equilibria.</strong> Write the 1-DOF system in state space
+                $\dot{x} = v$, $\dot{v} = f(x, v)$ and solve $v^* = 0$, $f(x^*, 0) = 0$ for each equilibrium $x^*$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Evaluate the Jacobian $\mathbf{J}(x^*)$.</strong> Compute
+                $\Delta = -\partial f/\partial x|_{x^*,0} = V''(x^*)/m$ and $\tau = \partial f/\partial v|_{x^*,0} = -c_{\text{eff}}/m$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Locate $(\tau, \Delta)$ on the Poincaré plane.</strong> Check the signs of $\Delta$, $\tau$,
+                and $D = \tau^2 - 4\Delta$ to identify the stability type before solving any differential equation.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Extract eigenvalues and eigendirections.</strong> Compute $\lambda_{1,2}$ and plot
+                $\mathbf{v}_i = [1, \lambda_i]^{\mathsf{T}}$ plus nullclines to sketch the local phase portrait accurately.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Verify hyperbolicity.</strong> If $\operatorname{Re}(\lambda_i) \ne 0$, Hartman–Grobman certifies
+                local topological equivalence. If $\tau = 0$ or $\Delta = 0$, use energy conservation or a nonlinear
+                Lyapunov function to determine true stability.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify current $(\tau, \Delta)$ system in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (SciPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FULL-WIDTH NAVY FOOTER ===================== -->
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script defer src="js/math-stability.js"></script>
+  <script defer src="js/viz-mech-potential.js"></script>
+  <script defer src="js/viz-eigen-phase.js"></script>
+  <script defer src="js/viz-trdet.js"></script>
+  <script defer src="js/viz-geometry.js"></script>
+  <script defer src="js/viz-nonlinear.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
