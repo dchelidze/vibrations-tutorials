@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuned Vibration Absorbers, Den Hartog Fixed Points &amp; Isolation — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\mu$</div>
+        <div>
+          <span class="brand-title">Tuned absorbers &amp; isolation</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-undamped">1. Force cancel</a>
+        <a href="#sec-fixedpoints">2. Fixed points</a>
+        <a href="#sec-splitting">3. Mass &amp; stroke</a>
+        <a href="#sec-isolation">4. Isolation</a>
+        <a href="#sec-design">5. Selection</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-params" class="btn-nav" type="button" title="Adjust absorber parameters live">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <circle cx="9" cy="7" r="2.2" fill="#132433"></circle>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+            <circle cx="15" cy="17" r="2.2" fill="#132433"></circle>
+          </svg>
+          <span>Parameters</span>
+        </button>
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING PARAMETERS DRAWER ===================== -->
+  <aside id="param-drawer" class="param-drawer" aria-label="Tuned absorber parameters">
+    <div class="drawer-header">
+      <h3>Dimensionless TVA parameters</h3>
+      <button id="btn-close-drawer" class="btn btn-sm" type="button" aria-label="Close parameters">Close</button>
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head"><span>Mass ratio $\mu = m_a / m_1$</span><span class="param-val" id="val-mu">0.10</span></div>
+      <input id="slider-mu" class="range-blue" type="range" min="0.03" max="0.40" step="0.01" value="0.10" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Tuning ratio $\beta = \omega_a / \omega_1$</span><span class="param-val" id="val-beta">0.909</span></div>
+      <input id="slider-beta" class="range-copper" type="range" min="0.55" max="1.35" step="0.005" value="0.909" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Absorber damping $\zeta_a = c_a/(2m_a\omega_a)$</span><span class="param-val" id="val-zeta">0.185</span></div>
+      <input id="slider-zeta" class="range-teal" type="range" min="0.00" max="0.80" step="0.005" value="0.185" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Driving frequency ratio $r = \omega / \omega_1$</span><span class="param-val" id="val-rdrive">1.00</span></div>
+      <input id="slider-rdrive" class="range-crimson" type="range" min="0.20" max="1.75" step="0.01" value="1.00" />
+    </div>
+
+    <div class="preset-chips" id="drawer-presets">
+      <button class="btn btn-sm" data-preset="den_hartog_opt" type="button">Den Hartog opt</button>
+      <button class="btn btn-sm" data-preset="undamped_frahm" type="button">Undamped Frahm</button>
+      <button class="btn btn-sm" data-preset="detuned_high" type="button">Detuned</button>
+      <button class="btn btn-sm" data-preset="heavy_absorber" type="button">Heavy μ=0.25</button>
+      <button class="btn btn-sm" data-preset="overdamped_lock" type="button">Overdamped</button>
+    </div>
+  </aside>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 05</div>
+      <div class="copper-bar"></div>
+      <h1>Tuned vibration absorbers, Den Hartog fixed points, and vibration isolation</h1>
+      <p class="hero-lead">
+        Attaching a small secondary oscillator $(m_a, k_a, c_a)$ to a resonating primary structure creates an
+        <span class="c-orange-hero">antiresonance force-cancellation notch</span> at $\omega = \omega_a$.
+        We visualize <span class="c-crimson-hero">Den Hartog's invariant fixed points $P$ and $Q$</span>,
+        the mass-ratio vs. <span class="c-blue-hero">absorber-stroke trade-off</span>, and how passive
+        <span class="c-teal-hero">vibration isolation crosses $T = 1$ at $r = \sqrt{2}$</span>.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select absorber preset">
+          <button class="pill active" data-preset="den_hartog_opt" type="button">Den Hartog optimum</button>
+          <button class="pill" data-preset="undamped_frahm" type="button">Undamped Frahm</button>
+          <button class="pill" data-preset="detuned_high" type="button">Detuned ($\beta = 1.05$)</button>
+          <button class="pill" data-preset="heavy_absorber" type="button">Heavy ($\mu = 0.25$)</button>
+          <button class="pill" data-preset="overdamped_lock" type="button">Overdamped lock-up</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: FORCE CANCELLATION & FREQUENCY SPLITTING
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-undamped">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Dynamic absorber mechanics &amp; phasor cancellation</span>
+        <h2>1. An undamped absorber zeroes primary motion at its tuning frequency by opposing the drive force</h2>
+        <p>
+          In steady state, the absorber exerts a reaction force $F_{a\to 1} = \omega^2 m_a X_a$ back onto the primary
+          mass $m_1$. When $\zeta_a = 0$ and the drive hits the absorber's standalone natural frequency $r = \beta$
+          ($\omega = \omega_a = \sqrt{k_a/m_a}$), the absorber swings $180^\circ$ out of phase with $F_0$ so that
+          $F_{a\to 1} = -F_0$ identically—leaving zero net force on $m_1$ and freezing $X_1 = 0$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Live primary + absorber oscillator</strong>
+              <span>Copper: drive $F_0(t)$ · Crimson: reaction $F_{a\to 1}(t)$</span>
+            </div>
+            <div class="canvas-box h-rig">
+              <canvas id="tva-rig-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex force-balance polygon on $m_1$</strong>
+              <span>$F_0 + F_{a\to 1} = (k_1 - \omega^2 m_1) X_1$</span>
+            </div>
+            <div class="canvas-box h-phasor">
+              <canvas id="tva-phasor-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-sec1-r">Driving frequency ratio $r = \omega / \omega_1$</label>
+          <input id="slider-sec1-r" class="range-copper" type="range" min="0.20" max="1.75" step="0.01" value="1.00" />
+          <span class="scrubber-val" id="val-sec1-r">r = 1.00</span>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-rig-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+            <button id="btn-snap-r1" class="btn btn-sm" type="button">Snap to lower split $r_1$</button>
+            <button id="btn-snap-notch" class="btn btn-sm" type="button">Snap to notch $r = \beta$</button>
+            <button id="btn-snap-r2" class="btn btn-sm" type="button">Snap to upper split $r_2$</button>
+            <button id="btn-zero-zeta" class="btn btn-sm" type="button">Test undamped ($\zeta_a = 0$)</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Primary amplification</div>
+            <div class="kpi-val c-blue" id="sec1-m1"></div>
+            <div class="kpi-sub">Vanishes at $r = \beta$ when $\zeta_a = 0$</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Absorber reaction force</div>
+            <div class="kpi-val c-crimson" id="sec1-fa"></div>
+            <div class="kpi-sub">Exact opposition ($1.00, \pm 180^\circ$) zeroes $m_1$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Undamped split resonances</div>
+            <div class="kpi-val c-orange" id="sec1-split"></div>
+            <div class="kpi-sub">Always bracket the notch: $r_1 &lt; \beta &lt; r_2$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: DEN HARTOG FIXED-POINT THEOREM
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-fixedpoints">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Den Hartog's fixed-point theorem</span>
+        <h2>2. Sweeping absorber damping pivots every FRF curve through two invariant fixed points $P$ and $Q$</h2>
+        <p>
+          Adding a damper $c_a$ across the absorber spring eliminates the infinite split peaks, turning the absorber
+          into a broadband tuned mass damper (TMD). Remarkably, for an undamped primary mass, the primary FRF
+          magnitude passes through two exact frequencies $r_P$ and $r_Q$ whose heights are <em>strictly independent of $\zeta_a$</em>.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$\left|\frac{X_1}{F_0/k_1}\right|
+            = \sqrt{\frac{(\beta^2 - r^2)^2 + (2\beta\zeta_a r)^2}{\big[(1 - r^2)(\beta^2 - r^2) - \mu\beta^2 r^2\big]^2 + (2\beta\zeta_a r)^2\big[1 - r^2(1+\mu)\big]^2}}$$
+        </div>
+
+        <div class="canvas-box h-fixed">
+          <canvas id="tva-fixedpt-canvas"></canvas>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-sec2-beta">Tuning $\beta = \omega_a / \omega_1$</label>
+            <input id="slider-sec2-beta" class="range-copper" type="range" min="0.55" max="1.35" step="0.005" value="0.909" />
+            <span class="scrubber-val" id="val-sec2-beta">β = 0.909</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-sec2-zeta">Damping $\zeta_a$</label>
+            <input id="slider-sec2-zeta" class="range-teal" type="range" min="0.00" max="0.80" step="0.005" value="0.185" />
+            <span class="scrubber-val" id="val-sec2-zeta">ζₐ = 0.185</span>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-snap-dh-opt" class="btn btn-sm btn-primary" type="button">
+              Snap to Den Hartog optimum ($\beta_{\mathrm{opt}}, \zeta_{a,\mathrm{opt}}$)
+            </button>
+            <label class="checkbox-label">
+              <input id="chk-dh-family" type="checkbox" checked />
+              <span>Show damping family ($\zeta_a = 0, 0.07, \zeta_{\mathrm{opt}}, 0.45$)</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="chk-dh-locked" type="checkbox" checked />
+              <span>Show locked-mass limit ($\zeta_a \to \infty$)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="kpi-grid-4">
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Left fixed point $P$</div>
+            <div class="kpi-val c-crimson" id="sec2-fp-p"></div>
+            <div class="kpi-sub">Invariant to $\zeta_a$</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Right fixed point $Q$</div>
+            <div class="kpi-val c-crimson" id="sec2-fp-q"></div>
+            <div class="kpi-sub">Invariant to $\zeta_a$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Den Hartog closed-form optimum</div>
+            <div class="kpi-val c-teal" id="sec2-opt"></div>
+            <div class="kpi-sub">$\beta_{\mathrm{opt}} = \frac{1}{1+\mu}$, $\zeta_{a,\mathrm{opt}} = \sqrt{\frac{3\mu}{8(1+\mu)}}$</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Current peak primary response</div>
+            <div class="kpi-val c-blue" id="sec2-peak"></div>
+            <div class="kpi-sub">No curve can beat $\max(M_P, M_Q)$</div>
+          </div>
+        </div>
+
+        <div class="callout callout-teal" id="sec2-callout"></div>
+
+        <details class="adv-note">
+          <summary><span>Optional advanced note: Why fixed points break when primary damping $\zeta_1 &gt; 0$</span></summary>
+          <div class="adv-body">
+            <p>
+              The fixed-point identity relies on the numerator and denominator containing $\zeta_a^2$ in a single
+              linear-fractional ratio $(A^2 + \zeta_a^2 B^2)/(C^2 + \zeta_a^2 D^2)$, which requires zero primary
+              damping ($\zeta_1 = 0$). When the primary structure itself has light damping ($\zeta_1 \in [0.01, 0.05]$),
+              the cross-term $4\zeta_1\zeta_a$ slightly blurs the exact intersections $P$ and $Q$, and the numerical
+              minimax optimum shifts $\beta_{\mathrm{opt}}$ slightly below $1/(1+\mu)$ while reducing the peak height
+              below $\sqrt{1 + 2/\mu}$. Den Hartog's closed form remains the standard starting point for design.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: MASS RATIO, BANDWIDTH & ABSORBER STROKE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-splitting">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Engineering trade-offs: mass ratio vs. stroke clearance</span>
+        <h2>3. Larger mass ratio widens the notch and lowers peak amplification at the cost of added mass</h2>
+        <p>
+          Suppressing primary motion transfers vibrational energy into the absorber mass. At the undamped notch
+          $r = \beta$, the absorber must swing with amplitude $|X_a| = F_0/k_a = X_{\mathrm{st}}/(\mu\beta^2)$:
+          making $\mu$ very small looks attractive for weight, but demands huge relative clearance $|X_a - X_1|$
+          and yields a razor-thin frequency split between $r_1$ and $r_2$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="scrubber-bar" style="margin-top: 0; margin-bottom: 14px;">
+          <label for="slider-sec3-mu">Mass ratio $\mu = m_a / m_1$</label>
+          <input id="slider-sec3-mu" class="range-blue" type="range" min="0.03" max="0.40" step="0.01" value="0.10" />
+          <span class="scrubber-val" id="val-sec3-mu">μ = 0.10</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Frequency split $r_1, r_2$ &amp; optimal peak $M_{\mathrm{opt}}(\mu)$</strong>
+              <span>Left axis: $r_1, r_2, \beta_{\mathrm{opt}}$ · Right axis: $M_{\mathrm{opt}}$</span>
+            </div>
+            <div class="canvas-box h-split">
+              <canvas id="tva-split-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Absorber relative stroke $|X_a - X_1| / X_{\mathrm{st}}$</strong>
+              <span>Physical spring-deflection clearance demand</span>
+            </div>
+            <div class="canvas-box h-split">
+              <canvas id="tva-stroke-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Undamped split width ($\beta = 1$)</div>
+            <div class="kpi-val c-blue" id="sec3-bw"></div>
+            <div class="kpi-sub">Wider split tolerates larger speed drift</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Optimal amplification floor</div>
+            <div class="kpi-val c-teal" id="sec3-bound"></div>
+            <div class="kpi-sub">Diminishing returns beyond $\mu \approx 0.20$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Undamped notch stroke</div>
+            <div class="kpi-val c-orange" id="sec3-stroke"></div>
+            <div class="kpi-sub">Verify spring fatigue &amp; clearance limits</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: PASSIVE VIBRATION ISOLATION & r = sqrt(2) CROSSOVER
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-isolation">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Passive vibration isolation &amp; transmissibility</span>
+        <h2>4. Passive isolation works only above $r = \sqrt{2}$, where all damping curves cross $T = 1$</h2>
+        <p>
+          Instead of attaching a secondary absorber mass, passive vibration isolation places a compliant mount
+          $(k, c)$ beneath the machine or payload. Both force transmissibility $|F_T|/F_0$ and base-excitation
+          displacement transmissibility $|X|/Y$ obey the identical curve $T(r,\zeta)$. Every damping curve crosses
+          $(r, T) = (\sqrt{2}, 1)$ identically; above $r = \sqrt{2}$, adding viscous damping actually <em>increases</em>
+          transmitted force because the damper transmits $\mathrm{i}c\omega X$ straight into the foundation.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$T(r, \zeta) = \left|\frac{F_T}{F_0}\right| = \left|\frac{X}{Y}\right|
+            = \sqrt{\frac{1 + (2\zeta r)^2}{(1 - r^2)^2 + (2\zeta r)^2}}
+            \qquad\Longrightarrow\qquad
+            T(\sqrt{2}, \zeta) \equiv 1 \;\;\forall\;\zeta \ge 0$$
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Transmissibility $T(r, \zeta)$ (log scale, drag $r$)</strong>
+              <span>Crimson dot: invariant $(\sqrt{2}, 1)$ crossover</span>
+            </div>
+            <div class="canvas-box h-iso">
+              <canvas id="tva-trans-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Transmitted force phasor triangle $F_T = kX + \mathrm{i}c\omega X$</strong>
+              <span>Dashed circle: $|F_T|/F_0 = 1$ isolation boundary</span>
+            </div>
+            <div class="canvas-box h-iso">
+              <canvas id="tva-iso-phasor-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-iso-r">Operating ratio $r = \omega / \omega_{\mathrm{n}}$</label>
+            <input id="slider-iso-r" class="range-copper" type="range" min="0.15" max="4.00" step="0.02" value="2.20" />
+            <span class="scrubber-val" id="val-iso-r">r = 2.20</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-iso-zeta">Mount damping $\zeta$</label>
+            <input id="slider-iso-zeta" class="range-teal" type="range" min="0.02" max="1.00" step="0.01" value="0.15" />
+            <span class="scrubber-val" id="val-iso-zeta">ζ = 0.15</span>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-iso-res" class="btn btn-sm" type="button">Resonance ($r = 1$)</button>
+            <button id="btn-iso-cross" class="btn btn-sm" type="button">Crossover ($r = \sqrt{2}$)</button>
+            <button id="btn-iso-high" class="btn btn-sm" type="button">Isolation ($r = 2.5$)</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Transmissibility $T(r, \zeta)$</div>
+            <div class="kpi-val c-blue" id="sec4-t"></div>
+            <div class="kpi-sub">Ratio $|F_T|/F_0 = |X|/Y$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Isolation performance</div>
+            <div class="kpi-val c-teal" id="sec4-iso"></div>
+            <div class="kpi-sub">Requires $r &gt; \sqrt{2} \approx 1.414$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Damping penalty check</div>
+            <div class="kpi-val c-orange" id="sec4-slope"></div>
+            <div class="kpi-sub">High-$r$ roll-off: $-40$ dB/dec ($\zeta=0$) vs. $-20$ dB/dec ($\zeta&gt;0$)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: SELECTION MATRIX (UNDAMPED TVA VS DAMPED TMD VS ISOLATOR)
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-design">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Strategy comparison</span>
+        <h2>5. Match the suppression strategy to narrowband tonal drives versus broadband excitation</h2>
+        <p>
+          Each passive control architecture solves a different vibration problem and carries a distinct geometric
+          trade-off between bandwidth, peak attenuation, static deflection, and clearance.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Key tuning rule</th>
+                <th>Strength</th>
+                <th>Geometric bottleneck</th>
+                <th>Typical application</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Undamped Frahm TVA</strong></td>
+                <td>$\omega_a = \omega_{\mathrm{drive}}$ ($\zeta_a \approx 0$)</td>
+                <td>Exact zero $X_1 = 0$ at a single constant speed</td>
+                <td>Splits resonance into two unbounded peaks $r_1, r_2$; fails if speed drifts</td>
+                <td>Constant-RPM machinery, power-line Stockbridge dampers (light damping)</td>
+              </tr>
+              <tr>
+                <td><strong>Damped TMD (Den Hartog)</strong></td>
+                <td>$\beta_{\mathrm{opt}} = \frac{1}{1+\mu}$, $\zeta_{a,\mathrm{opt}} = \sqrt{\frac{3\mu}{8(1+\mu)}}$</td>
+                <td>Minimax peak bound $M \le \sqrt{1+2/\mu}$ across all frequencies</td>
+                <td>Requires secondary mass $\mu \sim 0.05\text{–}0.20$ and absorber stroke clearance</td>
+                <td>Tall buildings (Taipei 101), footbridges, wind-turbine towers, powertrain dampers</td>
+              </tr>
+              <tr>
+                <td><strong>Passive isolator mount</strong></td>
+                <td>$r = \omega / \omega_{\mathrm{n}} &gt; \sqrt{2}$, light $\zeta$</td>
+                <td>Broadband attenuation above $\sqrt{2}\omega_{\mathrm{n}}$ without fine tuning</td>
+                <td>Low $\omega_{\mathrm{n}}$ causes large static sag $\delta_{\mathrm{st}} = g/\omega_{\mathrm{n}}^2$; startup crosses $r=1$</td>
+                <td>Engine mounts, optical tables, HVAC skids, sensitive lab instrumentation</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: WORKFLOW & LIVE CODE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Design workflow &amp; verification</span>
+        <h2>6. Step-by-step absorber and isolator design workflow</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Design sequence (Inman Ch. 5)</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Identify excitation spectrum.</strong> Single constant frequency $\Rightarrow$ undamped or lightly
+                damped TVA; variable/broadband near $\omega_1$ $\Rightarrow$ Den Hartog TMD; high-frequency drive $\Rightarrow$ passive isolator.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Choose mass ratio $\mu = m_a/m_1$ from allowable peak $M_{\mathrm{max}}$.</strong> Invert
+                $M_{\mathrm{opt}} = \sqrt{1 + 2/\mu}$ to get $\mu \ge 2 / (M_{\mathrm{max}}^2 - 1)$ (typically $0.05 \le \mu \le 0.25$).
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Compute Den Hartog stiffness and damping.</strong> Set $\omega_a = \omega_1/(1+\mu)$,
+                $k_a = m_a\omega_a^2$, and $c_a = 2 m_a \omega_a \sqrt{3\mu / (8(1+\mu))}$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Audit absorber relative stroke $|X_a - X_1|$.</strong> Confirm the absorber spring can accommodate
+                its peak excursion without bottoming out or yielding.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>For isolators, balance sag vs. startup resonance.</strong> Pick $\omega_{\mathrm{n}} \le \omega_{\mathrm{op}}/\sqrt{2}$
+                checking static deflection $\delta_{\mathrm{st}} = g/\omega_{\mathrm{n}}^2$, and use modest $\zeta$ to control startup without ruining high-$r$ roll-off.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify current TVA &amp; isolator in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (NumPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FULL-WIDTH NAVY FOOTER ===================== -->
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script defer src="js/math-tva.js"></script>
+  <script defer src="js/viz-tva-rig.js"></script>
+  <script defer src="js/viz-denhartog.js"></script>
+  <script defer src="js/viz-splitting.js"></script>
+  <script defer src="js/viz-isolation.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>

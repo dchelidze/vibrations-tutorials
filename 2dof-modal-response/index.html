@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modal Decoupling, Forced 2-DOF Response &amp; Antiresonance — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    crossorigin="anonymous"
+  ></script>
+</head>
+<body>
+
+  <!-- ===================== STICKY NAVY TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\mathbf{P}$</div>
+        <div>
+          <span class="brand-title">Modal decoupling &amp; antiresonance</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-ortho">1. Orthogonality</a>
+        <a href="#sec-decouple">2. Free modal</a>
+        <a href="#sec-forcing">3. Modal forcing</a>
+        <a href="#sec-antiresonance">4. Antiresonance</a>
+        <a href="#sec-damping">5. Damping</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-params" class="btn-nav" type="button" title="Adjust physical 2-DOF parameters live">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <circle cx="9" cy="7" r="2.2" fill="#132433"></circle>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+            <circle cx="15" cy="17" r="2.2" fill="#132433"></circle>
+          </svg>
+          <span>Parameters</span>
+        </button>
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== FLOATING PARAMETERS DRAWER ===================== -->
+  <aside id="param-drawer" class="param-drawer" aria-label="2-DOF system parameters">
+    <div class="drawer-header">
+      <h3>2-DOF physical parameters</h3>
+      <button id="btn-close-drawer" class="btn btn-sm" type="button" aria-label="Close parameters">Close</button>
+    </div>
+
+    <div class="param-row">
+      <div class="param-row-head"><span>Mass $m_1$</span><span class="param-val" id="val-m1">1.00 kg</span></div>
+      <input id="slider-m1" class="range-blue" type="range" min="0.4" max="4.0" step="0.1" value="1.0" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Mass $m_2$</span><span class="param-val" id="val-m2">1.80 kg</span></div>
+      <input id="slider-m2" class="range-copper" type="range" min="0.4" max="4.0" step="0.1" value="1.8" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Left spring $k_1$</span><span class="param-val" id="val-k1">10.0 N/m</span></div>
+      <input id="slider-k1" class="range-blue" type="range" min="2.0" max="28.0" step="0.5" value="10.0" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Coupling spring $k_2$</span><span class="param-val" id="val-k2">8.0 N/m</span></div>
+      <input id="slider-k2" class="range-copper" type="range" min="0.5" max="24.0" step="0.5" value="8.0" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Right spring $k_3$</span><span class="param-val" id="val-k3">4.0 N/m</span></div>
+      <input id="slider-k3" class="range-blue" type="range" min="0.0" max="24.0" step="0.5" value="4.0" />
+    </div>
+
+    <div class="drawer-subhead">Damping: $\mathbf{C} = \alpha\mathbf{M} + \beta\mathbf{K} + c_{\mathrm{loc}}\mathbf{E}_{\mathrm{loc}}$</div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Mass-proportional $\alpha$</span><span class="param-val" id="val-alpha">0.100 s⁻¹</span></div>
+      <input id="slider-alpha" class="range-teal" type="range" min="0.00" max="0.60" step="0.01" value="0.10" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Stiffness-proportional $\beta$</span><span class="param-val" id="val-beta">0.015 s</span></div>
+      <input id="slider-beta" class="range-teal" type="range" min="0.000" max="0.080" step="0.002" value="0.015" />
+    </div>
+    <div class="param-row">
+      <div class="param-row-head"><span>Localized damper $c_{\mathrm{loc}}$</span><span class="param-val" id="val-cloc">0.00 N·s/m</span></div>
+      <input id="slider-cloc" class="range-crimson" type="range" min="0.0" max="4.0" step="0.1" value="0.0" />
+    </div>
+
+    <div class="preset-chips" id="drawer-presets">
+      <button class="btn btn-sm" data-preset="asymmetric" type="button">Asymmetric</button>
+      <button class="btn btn-sm" data-preset="symmetric" type="button">Symmetric</button>
+      <button class="btn btn-sm" data-preset="weak_coupling" type="button">Weak coupling</button>
+      <button class="btn btn-sm" data-preset="heavy_base" type="button">Heavy base</button>
+      <button class="btn btn-sm" data-preset="nonproportional" type="button">Non-proportional</button>
+    </div>
+  </aside>
+
+  <!-- ===================== FULL-WIDTH NAVY HERO BAND ===================== -->
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 04</div>
+      <div class="copper-bar"></div>
+      <h1>Modal decoupling, forced 2-DOF response, and antiresonance</h1>
+      <p class="hero-lead">
+        Once we solve $\mathbf{K}\mathbf{u} = \omega^2\mathbf{M}\mathbf{u}$, the mass-normalized mode matrix
+        $\mathbf{P} = [\mathbf{u}_1\;\mathbf{u}_2]$ turns a coupled system
+        $\mathbf{M}\ddot{\mathbf{x}} + \mathbf{C}\dot{\mathbf{x}} + \mathbf{K}\mathbf{x} = \mathbf{f}(t)$ into
+        two uncoupled 1-DOF modal oscillators whenever $\mathbf{C}$ is proportional. We visualize
+        <span class="c-teal-hero">mass-weighted orthogonality</span>,
+        <span class="c-orange-hero">selective modal forcing</span>,
+        <span class="c-blue-hero">phasor interference behind antiresonance zeros</span>, and the geometric alignment
+        that separates <span class="c-crimson-hero">Rayleigh from non-proportional damping</span>.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select 2-DOF configuration">
+          <button class="pill active" data-preset="asymmetric" type="button">Asymmetric chain</button>
+          <button class="pill" data-preset="symmetric" type="button">Symmetric chain</button>
+          <button class="pill" data-preset="weak_coupling" type="button">Weak coupling</button>
+          <button class="pill" data-preset="heavy_base" type="button">Heavy base</button>
+          <button class="pill" data-preset="nonproportional" type="button">Non-proportional</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MAIN PAPER CONTENT ===================== -->
+  <main class="page-wrap">
+
+    <!-- ======================================================================
+         SECTION 1: MASS-WEIGHTED ORTHOGONALITY & MODAL PROJECTION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-ortho">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Mass-weighted inner product &amp; orthogonality</span>
+        <h2>1. Eigenvectors are skewed in physical space but perpendicular in the mass inner product</h2>
+        <p>
+          For distinct natural frequencies $\omega_1 \ne \omega_2$, the symmetric matrices $\mathbf{M}$ and $\mathbf{K}$
+          enforce $\mathbf{u}_1^{\mathsf{T}}\mathbf{M}\mathbf{u}_2 = 0$ and $\mathbf{u}_1^{\mathsf{T}}\mathbf{K}\mathbf{u}_2 = 0$
+          — not $\mathbf{u}_1^{\mathsf{T}}\mathbf{u}_2 = 0$. Geometrically, $\mathbf{u}_1$ and $\mathbf{u}_2$ are
+          conjugate diameters of the kinetic-energy ellipse $\mathbf{x}^{\mathsf{T}}\mathbf{M}\mathbf{x} = 1$: the
+          tangent to the ellipse at $\mathbf{u}_1$ runs parallel to $\mathbf{u}_2$. Rescaling to mass-normalized
+          coordinates $\mathbf{q} = \mathbf{M}^{1/2}\mathbf{x}$ turns that ellipse into the unit circle and snaps
+          $\mathbf{v}_1, \mathbf{v}_2$ to $90^\circ$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Physical configuration plane $(x_1, x_2)$</strong>
+              <span id="ortho-probe-readout" style="font-family: var(--font-mono); color: var(--copper-deep);">
+                x₀ = [1.05, 0.25]ᵀ
+              </span>
+            </div>
+            <div class="canvas-box h-ortho">
+              <canvas id="ortho-phys-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Mass-normalized plane $\mathbf{q} = \mathbf{M}^{1/2}\mathbf{x}$</strong>
+              <span>Kinetic ellipse becomes unit circle; $\mathbf{v}_1^{\mathsf{T}}\mathbf{v}_2 = 0$</span>
+            </div>
+            <div class="canvas-box h-ortho">
+              <canvas id="ortho-mass-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <label class="checkbox-label">
+              <input id="chk-ortho-euc" type="checkbox" checked />
+              <span>Show naive Euclidean drop (gray, wrong when $m_1 \ne m_2$)</span>
+            </label>
+            <label class="checkbox-label">
+              <input id="chk-ortho-stiff" type="checkbox" checked />
+              <span>Show stiffness contour</span>
+            </label>
+          </div>
+          <div class="controls-group">
+            <button id="btn-reset-probe" class="btn btn-sm" type="button">Reset probe $\mathbf{x}_0$</button>
+          </div>
+        </div>
+
+        <div class="legend-bar">
+          <span class="legend-item"><span class="legend-line" style="background: var(--c-blue);"></span>Kinetic unit contour ($\mathbf{x}^{\mathsf{T}}\mathbf{M}\mathbf{x}=1$)</span>
+          <span class="legend-item"><span class="legend-line" style="background: var(--c-teal);"></span>Mode 1 ($\mathbf{u}_1, \mathbf{v}_1$)</span>
+          <span class="legend-item"><span class="legend-line" style="background: var(--c-crimson);"></span>Mode 2 ($\mathbf{u}_2, \mathbf{v}_2$)</span>
+          <span class="legend-item"><span class="legend-line" style="background: var(--copper);"></span>Draggable initial state $\mathbf{x}_0$</span>
+        </div>
+
+        <div class="eq-stack" id="sec1-matrix-eqs"></div>
+
+        <div class="kpi-grid-4">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">First natural frequency</div>
+            <div class="kpi-val c-teal" id="kpi-w1"></div>
+            <div class="kpi-sub">In-phase fundamental mode</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Second natural frequency</div>
+            <div class="kpi-val c-crimson" id="kpi-w2"></div>
+            <div class="kpi-sub">Out-of-phase mode</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Angle $\angle(\mathbf{u}_1, \mathbf{u}_2)$ vs. $\angle(\mathbf{v}_1, \mathbf{v}_2)$</div>
+            <div class="kpi-val c-blue" id="kpi-phys-angle"></div>
+            <div class="kpi-sub">Skewed in $\mathbf{x}$, exact $90^\circ$ in $\mathbf{q}$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Exact modal coordinates</div>
+            <div class="kpi-val c-orange" id="kpi-modal-proj"></div>
+            <div class="kpi-sub">Via $\mathbf{r}_0 = \mathbf{P}^{\mathsf{T}}\mathbf{M}\mathbf{x}_0$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 2: FREE RESPONSE VIA MODAL DECOUPLING
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-decouple">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Free response &amp; modal superposition</span>
+        <h2>2. Modal coordinates decouple coupled motion into two independent 1-DOF oscillators</h2>
+        <p>
+          Substituting $\mathbf{x}(t) = \mathbf{P}\mathbf{r}(t) = r_1(t)\mathbf{u}_1 + r_2(t)\mathbf{u}_2$ and
+          premultiplying by $\mathbf{P}^{\mathsf{T}}$ yields $\ddot{r}_j + 2\zeta_j\omega_j\dot{r}_j + \omega_j^2 r_j = 0$
+          for proportional damping. Each modal coordinate obeys its own independent 1-DOF equation with initial
+          conditions extracted by mass-weighted projection $r_j(0) = \mathbf{u}_j^{\mathsf{T}}\mathbf{M}\mathbf{x}(0)$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="canvas-box h-rig">
+          <canvas id="free-rig-canvas"></canvas>
+        </div>
+
+        <div class="controls-row">
+          <div class="pill-group" id="ic-preset-pills" role="tablist" aria-label="Initial condition preset">
+            <button class="pill active" data-ic="pluck1" type="button">Pluck $m_1$ only</button>
+            <button class="pill" data-ic="pluck2" type="button">Pluck $m_2$ only</button>
+            <button class="pill" data-ic="mode1" type="button">Pure Mode 1</button>
+            <button class="pill" data-ic="mode2" type="button">Pure Mode 2</button>
+            <button class="pill" data-ic="equal_mix" type="button">Mixed modes</button>
+          </div>
+
+          <div class="controls-group">
+            <button id="btn-free-play" class="btn btn-sm btn-primary" type="button">Pause</button>
+            <button id="btn-free-reset" class="btn btn-sm" type="button">Restart $t=0$</button>
+            <label class="checkbox-label">
+              <input id="chk-show-energy" type="checkbox" />
+              <span>Show modal energies $E_1(t), E_2(t)$</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="canvas-box h-wave" style="margin-top: 12px;">
+          <canvas id="free-wave-canvas"></canvas>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Initial modal amplitudes</div>
+            <div class="kpi-val c-blue" id="sec2-r0"></div>
+            <div class="kpi-sub">$\mathbf{r}(0) = \mathbf{P}^{\mathsf{T}}\mathbf{M}\mathbf{x}(0)$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Initial modal energy split</div>
+            <div class="kpi-val c-teal" id="sec2-esplit"></div>
+            <div class="kpi-sub">No exchange between modes when $\tilde{c}_{12} = 0$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Modal damping ratios</div>
+            <div class="kpi-val c-orange" id="sec2-damping"></div>
+            <div class="kpi-sub">$\zeta_j = \tilde{c}_{jj} / (2\omega_j)$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 3: MODAL FORCING PROJECTION & SELECTIVE EXCITATION
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-forcing">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Generalized modal forces</span>
+        <h2>3. A force vector excites a mode only through its inner product with that mode shape</h2>
+        <p>
+          Under harmonic forcing $\mathbf{f}(t) = \mathbf{f}_0\cos(\omega t)$, transforming to modal coordinates gives
+          $\ddot{r}_j + 2\zeta_j\omega_j\dot{r}_j + \omega_j^2 r_j = Q_j\cos(\omega t)$, where the modal generalized
+          force is the <em>unweighted</em> dot product $Q_j = \mathbf{u}_j^{\mathsf{T}}\mathbf{f}_0$ (virtual work done
+          by $\mathbf{f}_0$ along $\mathbf{u}_j$). Placing $\mathbf{f}_0$ perpendicular to $\mathbf{u}_j$ silences mode
+          $j$ at every frequency—even right at $\omega = \omega_j$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Physical force plane $(F_1, F_2)$ — drag $\mathbf{f}_0$</strong>
+              <span id="force-vec-readout" style="font-family: var(--font-mono); color: var(--copper-deep);">
+                f₀ = [1.00, 0.00]ᵀ N
+              </span>
+            </div>
+            <div class="canvas-box h-force">
+              <canvas id="force-proj-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Steady-state response spectrum $|X_1(\omega)|, |X_2(\omega)|$</strong>
+              <span>Blue: $|X_1|$, Orange: $|X_2|$ (log scale)</span>
+            </div>
+            <div class="canvas-box h-force">
+              <canvas id="force-resp-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group" id="force-preset-btns">
+            <button class="btn btn-sm" data-fpreset="m1" type="button">Force on $m_1$</button>
+            <button class="btn btn-sm" data-fpreset="m2" type="button">Force on $m_2$</button>
+            <button class="btn btn-sm" data-fpreset="orth1" type="button">Silence Mode 1 ($Q_1=0$)</button>
+            <button class="btn btn-sm" data-fpreset="orth2" type="button">Silence Mode 2 ($Q_2=0$)</button>
+            <button class="btn btn-sm" data-fpreset="inphase" type="button">In-phase $[1,1]^{\mathsf{T}}$</button>
+            <button class="btn btn-sm" data-fpreset="outphase" type="button">Out-of-phase $[1,-1]^{\mathsf{T}}$</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Mode 1 generalized force</div>
+            <div class="kpi-val c-teal" id="sec3-q1"></div>
+            <div class="kpi-sub">Controls height of $\omega_1$ peak</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Mode 2 generalized force</div>
+            <div class="kpi-val c-crimson" id="sec3-q2"></div>
+            <div class="kpi-sub">Controls height of $\omega_2$ peak</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Modal forcing share ($Q_j^2 / \|\mathbf{Q}\|^2$)</div>
+            <div class="kpi-val c-orange" id="sec3-share"></div>
+            <div class="kpi-sub">Zero on the dashed null line</div>
+          </div>
+        </div>
+
+        <div class="callout callout-blue" id="sec3-callout"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 4: DRIVING-POINT VS TRANSFER FRFS & ANTIRESONANCE PHASORS
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-antiresonance">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Modal superposition in the complex plane</span>
+        <h2>4. Antiresonance arises from destructive phasor interference between consecutive modes</h2>
+        <p>
+          Each entry of the receptance matrix $\mathbf{H}(\mathrm{i}\omega) = (\mathbf{K} - \omega^2\mathbf{M} + \mathrm{i}\omega\mathbf{C})^{-1}$
+          splits into a sum of modal phasors. Whether an antiresonance notch appears between $\omega_1$ and $\omega_2$
+          depends purely on the <em>relative signs</em> of the two modal residues $R_1 = u_{j1}u_{k1}$ and $R_2 = u_{j2}u_{k2}$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box">
+          $$H_{jk}(\mathrm{i}\omega)
+            = \underbrace{\frac{u_{j1}u_{k1}}{\omega_1^2 - \omega^2 + \mathrm{i}2\zeta_1\omega_1\omega}}_{\mathbf{h}^{(1)}_{jk}(\omega)}
+            + \underbrace{\frac{u_{j2}u_{k2}}{\omega_2^2 - \omega^2 + \mathrm{i}2\zeta_2\omega_2\omega}}_{\mathbf{h}^{(2)}_{jk}(\omega)}$$
+        </div>
+
+        <div class="controls-row" style="margin-bottom: 10px;">
+          <div class="pill-group" id="frf-entry-pills" role="tablist" aria-label="Select FRF entry">
+            <button class="pill active" data-entry="H11" type="button">Driving-point $H_{11}$</button>
+            <button class="pill" data-entry="H21" type="button">Transfer $H_{21} = H_{12}$</button>
+            <button class="pill" data-entry="H22" type="button">Driving-point $H_{22}$</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-snap-w1" class="btn btn-sm" type="button">Snap to $\omega_1$</button>
+            <button id="btn-snap-wa" class="btn btn-sm btn-primary" type="button">Snap to antiresonance $\omega_{\mathrm{a}}$</button>
+            <button id="btn-snap-w2" class="btn btn-sm" type="button">Snap to $\omega_2$</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Bode magnitude &amp; phase (drag cursor horizontally)</strong>
+              <span>Resonances $\omega_1, \omega_2$ &amp; notch $\omega_{\mathrm{a}}$</span>
+            </div>
+            <div class="canvas-box h-bode">
+              <canvas id="frf-bode-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex-plane modal phasor sum $\mathbf{h}^{(1)} + \mathbf{h}^{(2)}$</strong>
+              <span>Head-to-tail interference at current $\omega$</span>
+            </div>
+            <div class="canvas-box h-phasor">
+              <canvas id="frf-phasor-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-anti-omega">Excitation frequency $\omega$</label>
+          <input id="slider-anti-omega" class="range-copper" type="range" min="0.1" max="10" step="0.02" value="2.5" />
+          <span class="scrubber-val" id="val-anti-omega">ω = 2.50 rad/s</span>
+        </div>
+
+        <div class="canvas-box h-mini-rig" style="margin-top: 12px;">
+          <canvas id="frf-mini-rig-canvas"></canvas>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Modal residues $R_1, R_2$</div>
+            <div class="kpi-val c-teal" id="sec4-residues"></div>
+            <div class="kpi-sub">Same sign $\Rightarrow$ antiresonance; opposite sign $\Rightarrow$ none</div>
+          </div>
+          <div class="kpi kpi-amber">
+            <div class="kpi-label">Undamped antiresonance frequency</div>
+            <div class="kpi-val c-amber" id="sec4-wa"></div>
+            <div class="kpi-sub">Subsystem resonance when driven mass is pinned</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Current FRF value</div>
+            <div class="kpi-val c-blue" id="sec4-hval"></div>
+            <div class="kpi-sub">Reciprocity: $H_{12}(\mathrm{i}\omega) \equiv H_{21}(\mathrm{i}\omega)$</div>
+          </div>
+        </div>
+
+        <div class="callout callout-teal" id="sec4-callout"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 5: PROPORTIONAL VS NON-PROPORTIONAL DAMPING GEOMETRY
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-damping">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Rayleigh alignment &amp; modal coupling</span>
+        <h2>5. Proportional damping aligns its dissipation ellipse with the modal axes; general damping couples them</h2>
+        <p>
+          Normal modes simultaneously diagonalize $\mathbf{M}$ and $\mathbf{K}$, but they diagonalize $\mathbf{C}$
+          only when the mass-normalized damping matrix $\mathbf{C}_q = \mathbf{M}^{-1/2}\mathbf{C}\mathbf{M}^{-1/2}$
+          shares the exact same principal axes as $\tilde{\mathbf{K}}$. Adding a localized physical damper $c_{\mathrm{loc}}$
+          rotates the Rayleigh dissipation ellipse off the modal axes, creating off-diagonal modal coupling $\tilde{c}_{12} \ne 0$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 12px;">
+          <div class="pill-group" id="damp-site-pills" role="tablist" aria-label="Localized damper location">
+            <button class="pill active" data-site="m1" type="button">Damper on $m_1$</button>
+            <button class="pill" data-site="m2" type="button">Damper on $m_2$</button>
+            <button class="pill" data-site="couple" type="button">Inter-mass damper</button>
+          </div>
+          <div class="controls-group">
+            <button id="btn-zero-cloc" class="btn btn-sm" type="button">Reset $c_{\mathrm{loc}} = 0$ (Rayleigh)</button>
+          </div>
+        </div>
+
+        <div class="scrubber-bar" style="margin-top: 0; margin-bottom: 14px;">
+          <label for="slider-sec5-cloc">Localized damper $c_{\mathrm{loc}}$</label>
+          <input id="slider-sec5-cloc" class="range-crimson" type="range" min="0" max="4.0" step="0.1" value="0.0" />
+          <span class="scrubber-val" id="val-sec5-cloc">c_loc = 0.00 N·s/m</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Stiffness vs. dissipation ellipses in $\mathbf{q}$-space</strong>
+              <span>Blue: $\tilde{\mathbf{K}}$ axes; Teal/Crimson: $\mathbf{C}_q$ axes</span>
+            </div>
+            <div class="canvas-box h-damp">
+              <canvas id="damp-ellipse-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Exact coupled $|H_{11}|$ vs. diagonal-modal approximation</strong>
+              <span>Solid blue: exact; Dashed crimson: dropping $\tilde{c}_{12}$</span>
+            </div>
+            <div class="canvas-box h-damp">
+              <canvas id="damp-compare-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="eq-box" id="sec5-ctilde-eq"></div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Off-diagonal modal coupling</div>
+            <div class="kpi-val c-crimson" id="sec5-c12"></div>
+            <div class="kpi-sub">$\eta_{\mathrm{np}} = |\tilde{c}_{12}| / \sqrt{\tilde{c}_{11}\tilde{c}_{22}}$</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Principal-axis misalignment $\Delta\theta$</div>
+            <div class="kpi-val c-blue" id="sec5-angle"></div>
+            <div class="kpi-sub">$0^\circ$ iff $\mathbf{C}$ is classically damped</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Caughey–O'Kelly commutator</div>
+            <div class="kpi-val c-teal" id="sec5-comm"></div>
+            <div class="kpi-sub">Vanishes iff $\mathbf{C}\mathbf{M}^{-1}\mathbf{K} = \mathbf{K}\mathbf{M}^{-1}\mathbf{C}$</div>
+          </div>
+        </div>
+
+        <details class="adv-note">
+          <summary><span>Optional advanced note: Caughey–O'Kelly criterion and complex modes</span></summary>
+          <div class="adv-body">
+            <p>
+              Real undamped normal modes diagonalize $\mathbf{C}$ if and only if the symmetric matrices $\mathbf{C}_q$
+              and $\tilde{\mathbf{K}}$ commute: $\mathbf{C}_q\tilde{\mathbf{K}} = \tilde{\mathbf{K}}\mathbf{C}_q$,
+              which in physical coordinates reads $\mathbf{C}\mathbf{M}^{-1}\mathbf{K} = \mathbf{K}\mathbf{M}^{-1}\mathbf{C}$
+              (Caughey &amp; O'Kelly, 1965). For a 2-DOF system with distinct natural frequencies, any matrix commuting
+              with $\tilde{\mathbf{K}}$ has the exact Rayleigh form $\mathbf{C} = \alpha\mathbf{M} + \beta\mathbf{K}$.
+            </p>
+            <p>
+              When $\tilde{c}_{12} \ne 0$, the exact free-vibration modes live in the 4-D Foss state space
+              ($\dot{\mathbf{z}} = \mathbf{A}\mathbf{z}$) as complex conjugate eigenvectors: components $x_1(t)$ and
+              $x_2(t)$ oscillate with a nontrivial phase shift rather than passing through equilibrium simultaneously.
+              The diagonal-modal approximation (neglecting $\tilde{c}_{12}$) remains accurate only when
+              $|\tilde{c}_{12}| \ll |\omega_2^2 - \omega_1^2|/\omega_{\text{avg}}$ (well-separated modes and light damping).
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 6: SUMMARY TABLE, WORKFLOW & LIVE CODE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Reference synthesis &amp; verification</span>
+        <h2>6. Three coordinate representations and step-by-step modal workflow</h2>
+        <p>
+          Compare how mass, stiffness, inner product, and harmonic forcing transform across physical, mass-normalized,
+          and modal coordinates, then verify the active parameter set directly in MATLAB or Python.
+        </p>
+      </div>
+
+      <div class="card" style="margin-bottom: 18px;">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Coordinate basis</th>
+                <th>Transformation</th>
+                <th>Kinetic &amp; stiffness matrices</th>
+                <th>Mode orthogonality</th>
+                <th>Harmonic EOM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Physical</strong> $\mathbf{x}$</td>
+                <td>Direct displacements $[x_1, x_2]^{\mathsf{T}}$</td>
+                <td>$\mathbf{M}$, $\mathbf{K}$ (coupled)</td>
+                <td>$\mathbf{u}_1^{\mathsf{T}}\mathbf{M}\mathbf{u}_2 = 0$ (skewed)</td>
+                <td>$\mathbf{M}\ddot{\mathbf{x}} + \mathbf{C}\dot{\mathbf{x}} + \mathbf{K}\mathbf{x} = \mathbf{f}(t)$</td>
+              </tr>
+              <tr>
+                <td><strong>Mass-normalized</strong> $\mathbf{q}$</td>
+                <td>$\mathbf{q} = \mathbf{M}^{1/2}\mathbf{x}$</td>
+                <td>$\mathbf{I}$, $\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$</td>
+                <td>$\mathbf{v}_1^{\mathsf{T}}\mathbf{v}_2 = 0$ (exact $90^\circ$)</td>
+                <td>$\ddot{\mathbf{q}} + \mathbf{C}_q\dot{\mathbf{q}} + \tilde{\mathbf{K}}\mathbf{q} = \mathbf{M}^{-1/2}\mathbf{f}(t)$</td>
+              </tr>
+              <tr>
+                <td><strong>Modal</strong> $\mathbf{r}$</td>
+                <td>$\mathbf{x} = \mathbf{P}\mathbf{r}$, $\mathbf{r} = \mathbf{P}^{\mathsf{T}}\mathbf{M}\mathbf{x}$</td>
+                <td>$\mathbf{I}$, $\mathbf{\Lambda} = \operatorname{diag}(\omega_1^2, \omega_2^2)$</td>
+                <td>Standard basis $\mathbf{e}_1, \mathbf{e}_2$</td>
+                <td>$\ddot{\mathbf{r}} + \tilde{\mathbf{C}}\dot{\mathbf{r}} + \mathbf{\Lambda}\mathbf{r} = \mathbf{P}^{\mathsf{T}}\mathbf{f}(t)$</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Step-by-step 2-DOF modal analysis workflow</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div>
+                <strong>Form symmetric $\mathbf{M}, \mathbf{K}, \mathbf{C}$.</strong> Choose consistent positive
+                coordinates and verify symmetry ($\mathbf{M}^{\mathsf{T}}=\mathbf{M}$, $\mathbf{K}^{\mathsf{T}}=\mathbf{K}$).
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div>
+                <strong>Solve the mass-normalized eigenproblem.</strong> Diagonalize $\tilde{\mathbf{K}} = \mathbf{M}^{-1/2}\mathbf{K}\mathbf{M}^{-1/2}$
+                to get orthonormal $\mathbf{V}$ and mass-normalized physical modes $\mathbf{P} = \mathbf{M}^{-1/2}\mathbf{V}$.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div>
+                <strong>Check modal damping $\tilde{\mathbf{C}} = \mathbf{P}^{\mathsf{T}}\mathbf{C}\mathbf{P}$.</strong>
+                If off-diagonal $\tilde{c}_{12} = 0$, the modal equations decouple identically; otherwise use direct
+                complex inversion $\mathbf{H}(\mathrm{i}\omega) = (\mathbf{K} - \omega^2\mathbf{M} + \mathrm{i}\omega\mathbf{C})^{-1}$
+                or state-space integration.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div>
+                <strong>Project initial conditions and forcing.</strong> Use $\mathbf{r}(0) = \mathbf{P}^{\mathsf{T}}\mathbf{M}\mathbf{x}(0)$
+                for initial states and $\mathbf{Q}(t) = \mathbf{P}^{\mathsf{T}}\mathbf{f}(t)$ for forces.
+              </div>
+            </li>
+            <li>
+              <span class="step-badge">5</span>
+              <div>
+                <strong>Reconstruct and audit limiting cases.</strong> Recover $\mathbf{x}(t) = r_1\mathbf{u}_1 + r_2\mathbf{u}_2$
+                and verify reciprocity ($H_{12} = H_{21}$), static limit $\mathbf{H}(0) = \mathbf{K}^{-1}$, and driving-point
+                antiresonance $\omega_1 < \omega_{\mathrm{a}} < \omega_2$.
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify current 2-DOF system in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (NumPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         HOW TO CITE
+         ====================================================================== -->
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FULL-WIDTH NAVY FOOTER ===================== -->
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script defer src="js/math-modal2dof.js"></script>
+  <script defer src="js/viz-orthogonality.js"></script>
+  <script defer src="js/viz-free-modal.js"></script>
+  <script defer src="js/viz-forcing.js"></script>
+  <script defer src="js/viz-antiresonance.js"></script>
+  <script defer src="js/viz-damping.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
