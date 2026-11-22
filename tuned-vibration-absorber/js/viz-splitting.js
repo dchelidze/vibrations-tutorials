@@ -172,19 +172,43 @@
       for (let mu = 0; mu <= muMax + 1e-6; mu += 0.1) {
         ctx.fillText(M.fmt(mu, 1), toX(mu), padT + plotH + 6);
       }
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      ctx.fillText('Mass ratio μ = mₐ / m₁', padL + plotW * 0.5, h - 14);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Mass ratio μ = ', bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: 'a', sub: true, bold: true },
+          { t: ' / ', bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: '1', sub: true, bold: true }
+        ],
+        padL + plotW * 0.5,
+        h - 10,
+        { size: 11, color: C.text, align: 'center' }
+      );
 
       // Curve annotations
-      ctx.font = '600 10.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillStyle = C.crimson;
-      ctx.fillText('r₂ (upper split)', padL + plotW - 6, toYR(r2s[N]) - 10);
-      ctx.fillStyle = C.blue;
-      ctx.fillText('r₁ (lower split)', padL + plotW - 6, toYR(r1s[N]) + 14);
-      ctx.fillStyle = C.teal;
-      ctx.textAlign = 'left';
-      ctx.fillText('M_opt(μ) [right axis]', padL + 8, padT + 14);
+      Theme.drawMath(
+        ctx,
+        [{ t: 'r', i: true, bold: true }, { t: '2', sub: true, bold: true }, { t: ' (upper split)', bold: true }],
+        padL + plotW - 6,
+        toYR(r2s[N]) - 12,
+        { size: 10.5, color: C.crimson, align: 'right' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'r', i: true, bold: true }, { t: '1', sub: true, bold: true }, { t: ' (lower split)', bold: true }],
+        padL + plotW - 6,
+        toYR(r1s[N]) + 14,
+        { size: 10.5, color: C.blue, align: 'right' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'M', i: true, bold: true }, { t: 'opt', sub: true, bold: true }, { t: '(μ) [right axis]', bold: true }],
+        padL + 8,
+        padT + 14,
+        { size: 10.5, color: C.teal, align: 'left' }
+      );
     }
 
     function drawStrokeCanvas() {
@@ -307,14 +331,37 @@
       for (let r = 0; r <= rMax + 1e-6; r += 0.3) {
         ctx.fillText(M.fmt(r, 1), toX(r), padT + plotH + 6);
       }
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      ctx.fillText('Forcing frequency ratio r = ω / ω₁', padL + plotW * 0.5, h - 14);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Forcing frequency ratio ', bold: true },
+          { t: 'r', i: true, bold: true },
+          { t: ' = ω / ω', bold: true },
+          { t: '1', sub: true, bold: true }
+        ],
+        padL + plotW * 0.5,
+        h - 10,
+        { size: 11, color: C.text, align: 'center' }
+      );
 
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '600 10.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('Orange: current |Xₐ − X₁|/Xst · Dashed teal: Den Hartog optimum', padL, padT - 6);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Orange: current |', bold: true },
+          { t: 'X', i: true, bold: true },
+          { t: 'a', sub: true, bold: true },
+          { t: ' − ', bold: true },
+          { t: 'X', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: '|/', bold: true },
+          { t: 'X', i: true, bold: true },
+          { t: 'st', sub: true, bold: true },
+          { t: ' · Dashed teal: Den Hartog optimum', bold: true }
+        ],
+        padL,
+        padT - 12,
+        { size: 10.5, color: C.textMuted, align: 'left' }
+      );
     }
 
     function render() {

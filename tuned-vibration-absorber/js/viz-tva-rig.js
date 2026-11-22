@@ -2,11 +2,11 @@
  * viz-tva-rig.js
  * Section 1 visualization for Module 05 (tuned-vibration-absorber):
  * - Left canvas: Live animated primary mass m1 + absorber mass ma driven harmonically
- *                by F0 cos(w t), showing live opposing reaction force arrow Fa vs drive F0.
- *                Right at r = beta (with zetaA = 0), m1 freezes completely still!
+ *                by F0 cos(w t), showing live opposing reaction force arrow F_{a->1}(t) vs F0(t).
+ *                Uses typographic canvas subscripts and auto-sized mass boxes so text always fits cleanly.
  * - Right canvas: Complex force-balance phasor diagram on m1:
- *                 F_prim = (1 - r^2) X1/Xst  =  F0 + Fa
- *                 showing Fa rotating into exact 180-deg opposition to F0 at r = beta!
+ *                 F_0 + F_{a->1} = (k_1 - w^2 m_1) X_1
+ *                 showing F_{a->1} rotating into exact 180-deg opposition to F_0 at r = beta.
  */
 (function () {
   'use strict';
@@ -51,47 +51,68 @@
 
       const res = M.evalTVA(sys.mu, sys.beta, sys.zetaA, sys.rDrive);
       const maxAmp = Math.max(res.M1, res.Ma, 1.5);
-      // Compress large near-resonant amplitudes smoothly so rig never leaves canvas
-      const dispScale = Math.min(34, h * 0.11) / Math.min(maxAmp, 14);
-      const x1 = Math.max(-44, Math.min(44, res.M1 * Math.cos(state.phaseTime + res.ph1) * dispScale));
-      const xa = Math.max(-52, Math.min(52, res.Ma * Math.cos(state.phaseTime + res.phA) * dispScale));
+      const dispScale = Math.min(32, h * 0.105) / Math.min(maxAmp, 14);
+      const x1 = Math.max(-42, Math.min(42, res.M1 * Math.cos(state.phaseTime + res.ph1) * dispScale));
+      const xa = Math.max(-48, Math.min(48, res.Ma * Math.cos(state.phaseTime + res.phA) * dispScale));
 
       const cx = w * 0.5;
-      const baseY = h - 32;
-      const m1RestY = h * 0.60;
+      const baseY = h - 30;
+      const m1RestY = h * 0.61;
       const maRestY = h * 0.25;
       const m1Y = m1RestY - x1;
       const maY = maRestY - xa;
 
-      const m1Label = 'Primary m₁';
-      const m1Sub = '|X₁|/Xst = ' + M.fmt(res.M1, 2);
-      const maLabel = 'mₐ (μ=' + M.fmt(sys.mu, 2) + ')';
-      const maSub = '|Xₐ|/Xst = ' + M.fmt(res.Ma, 2);
+      // Measure typographic runs so both mass boxes ALWAYS contain their text with generous margin
+      const m1TitleRuns = [
+        { t: 'Primary ', bold: true },
+        { t: 'm', i: true, bold: true },
+        { t: '1', sub: true, bold: true }
+      ];
+      const m1SubRuns = [
+        { t: '|' },
+        { t: 'X', i: true },
+        { t: '1', sub: true },
+        { t: '|/' },
+        { t: 'X', i: true },
+        { t: 'st', sub: true },
+        { t: ' = ' + M.fmt(res.M1, 2) }
+      ];
 
-      ctx.font = '600 13.5px "IBM Plex Sans", sans-serif';
-      const m1TextW = ctx.measureText(m1Label).width;
-      ctx.font = '500 11px "IBM Plex Mono", monospace';
-      const m1SubW = ctx.measureText(m1Sub).width;
-      const m1W = Math.max(132, Math.ceil(Math.max(m1TextW, m1SubW)) + 24);
-      const m1H = 54;
+      const maTitleRuns = [
+        { t: 'm', i: true, bold: true },
+        { t: 'a', sub: true, bold: true },
+        { t: ' (μ = ' + M.fmt(sys.mu, 2) + ')', bold: true }
+      ];
+      const maSubRuns = [
+        { t: '|' },
+        { t: 'X', i: true },
+        { t: 'a', sub: true },
+        { t: '|/' },
+        { t: 'X', i: true },
+        { t: 'st', sub: true },
+        { t: ' = ' + M.fmt(res.Ma, 2) }
+      ];
 
-      ctx.font = '600 12.5px "IBM Plex Sans", sans-serif';
-      const maTextW = ctx.measureText(maLabel).width;
-      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      const maSubW = ctx.measureText(maSub).width;
-      const maW = Math.max(114, Math.ceil(Math.max(maTextW, maSubW)) + 24);
-      const maH = 46;
+      const m1TitleW = Theme.measureMathRuns(ctx, m1TitleRuns, 13, '"IBM Plex Sans", sans-serif');
+      const m1SubW = Theme.measureMathRuns(ctx, m1SubRuns, 11, '"IBM Plex Mono", monospace');
+      const m1W = Math.max(150, Math.ceil(Math.max(m1TitleW, m1SubW)) + 34);
+      const m1H = 56;
+
+      const maTitleW = Theme.measureMathRuns(ctx, maTitleRuns, 12.5, '"IBM Plex Sans", sans-serif');
+      const maSubW = Theme.measureMathRuns(ctx, maSubRuns, 11, '"IBM Plex Mono", monospace');
+      const maW = Math.max(142, Math.ceil(Math.max(maTitleW, maSubW)) + 34);
+      const maH = 52;
 
       // Ground base with hatching
       ctx.strokeStyle = C.axis;
       ctx.lineWidth = 2.2;
       ctx.beginPath();
-      ctx.moveTo(cx - 95, baseY);
-      ctx.lineTo(cx + 95, baseY);
+      ctx.moveTo(cx - 102, baseY);
+      ctx.lineTo(cx + 102, baseY);
       ctx.stroke();
       ctx.lineWidth = 1;
       ctx.strokeStyle = C.textMuted;
-      for (let gx = cx - 90; gx <= cx + 88; gx += 12) {
+      for (let gx = cx - 96; gx <= cx + 96; gx += 12) {
         ctx.beginPath();
         ctx.moveTo(gx, baseY);
         ctx.lineTo(gx - 7, baseY + 9);
@@ -104,115 +125,158 @@
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(cx - 120, m1RestY);
-      ctx.lineTo(cx + 120, m1RestY);
-      ctx.moveTo(cx - 105, maRestY);
-      ctx.lineTo(cx + 105, maRestY);
+      ctx.moveTo(cx - m1W * 0.5 - 16, m1RestY);
+      ctx.lineTo(cx + m1W * 0.5 + 16, m1RestY);
+      ctx.moveTo(cx - maW * 0.5 - 14, maRestY);
+      ctx.lineTo(cx + maW * 0.5 + 14, maRestY);
       ctx.stroke();
       ctx.restore();
 
-      // Primary spring k1 (ground to m1)
+      // Primary spring k_1 (ground to m_1)
       Theme.drawSpring(ctx, cx, baseY, cx, m1Y + m1H * 0.5, 7, 11, C.blue, 2.0);
-      ctx.fillStyle = C.blue;
-      ctx.font = '600 11.5px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('k₁', cx + 18, 0.5 * (baseY + m1Y + m1H * 0.5));
+      Theme.drawMath(
+        ctx,
+        [{ t: 'k', i: true, bold: true }, { t: '1', sub: true, bold: true }],
+        cx + 18,
+        0.5 * (baseY + m1Y + m1H * 0.5),
+        { size: 12, color: C.blue, align: 'left' }
+      );
 
-      // Absorber spring ka + optional damper ca (m1 to ma)
+      // Absorber spring k_a + optional damper c_a (m_1 to m_a)
       const hasDamper = sys.zetaA > 1e-4;
-      const spX = hasDamper ? cx - 18 : cx;
+      const spX = hasDamper ? cx - 22 : cx;
+      const dpX = cx + 22;
+      const midSpringY = 0.5 * (m1Y - m1H * 0.5 + maY + maH * 0.5);
       Theme.drawSpring(ctx, spX, m1Y - m1H * 0.5, spX, maY + maH * 0.5, 6, 8, C.orange, 1.9);
       if (hasDamper) {
-        Theme.drawDamper(ctx, cx + 18, m1Y - m1H * 0.5, cx + 18, maY + maH * 0.5, C.teal, 1.6);
+        Theme.drawDamper(ctx, dpX, m1Y - m1H * 0.5, dpX, maY + maH * 0.5, C.teal, 1.6);
       }
 
-      ctx.fillStyle = C.orange;
-      ctx.font = '600 11px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'right';
-      ctx.fillText('kₐ', spX - 13, 0.5 * (m1Y - m1H * 0.5 + maY + maH * 0.5));
+      Theme.drawMath(
+        ctx,
+        [{ t: 'k', i: true, bold: true }, { t: 'a', sub: true, bold: true }],
+        spX - 14,
+        midSpringY,
+        { size: 11.5, color: C.orange, align: 'right' }
+      );
       if (hasDamper) {
-        ctx.fillStyle = C.teal;
-        ctx.textAlign = 'left';
-        ctx.fillText('cₐ', cx + 30, 0.5 * (m1Y - m1H * 0.5 + maY + maH * 0.5));
+        Theme.drawMath(
+          ctx,
+          [{ t: 'c', i: true, bold: true }, { t: 'a', sub: true, bold: true }],
+          dpX + 14,
+          midSpringY,
+          { size: 11.5, color: C.teal, align: 'left' }
+        );
       }
 
-      // Primary mass block m1
+      // Primary mass block m_1
       ctx.fillStyle = C.bgSubtle;
       ctx.strokeStyle = C.blue;
       ctx.lineWidth = 2.4;
       ctx.fillRect(cx - m1W * 0.5, m1Y - m1H * 0.5, m1W, m1H);
       ctx.strokeRect(cx - m1W * 0.5, m1Y - m1H * 0.5, m1W, m1H);
-      ctx.fillStyle = C.blue;
-      ctx.font = '600 13.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(m1Label, cx, m1Y - 8);
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 11px "IBM Plex Mono", monospace';
-      ctx.fillText(m1Sub, cx, m1Y + 11);
+      Theme.drawMath(ctx, m1TitleRuns, cx, m1Y - 10, { size: 13, color: C.blue, align: 'center' });
+      Theme.drawMath(ctx, m1SubRuns, cx, m1Y + 11, {
+        size: 11,
+        color: C.textMuted,
+        align: 'center',
+        family: '"IBM Plex Mono", monospace'
+      });
 
-      // Absorber mass block ma
+      // Absorber mass block m_a
       ctx.fillStyle = C.bgSubtle;
       ctx.strokeStyle = C.orange;
       ctx.lineWidth = 2.4;
       ctx.fillRect(cx - maW * 0.5, maY - maH * 0.5, maW, maH);
       ctx.strokeRect(cx - maW * 0.5, maY - maH * 0.5, maW, maH);
-      ctx.fillStyle = C.orange;
-      ctx.font = '600 12.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(maLabel, cx, maY - 8);
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.fillText(maSub, cx, maY + 10);
+      Theme.drawMath(ctx, maTitleRuns, cx, maY - 9, { size: 12.5, color: C.orange, align: 'center' });
+      Theme.drawMath(ctx, maSubRuns, cx, maY + 10, {
+        size: 11,
+        color: C.textMuted,
+        align: 'center',
+        family: '"IBM Plex Mono", monospace'
+      });
 
-      // Live vertical harmonic force arrows on m1: external F0 (left) vs absorber reaction Fa (right)
+      // Live vertical harmonic force arrows on m_1: external F_0(t) (left) vs absorber reaction F_{a->1}(t) (right)
       const f0Inst = Math.cos(state.phaseTime);
       const faMag = M.cAbs(res.Fa);
       const faPh = M.cArg(res.Fa);
       const faInst = Math.max(-2.5, Math.min(2.5, faMag * Math.cos(state.phaseTime + faPh)));
 
       const fScale = 36;
-      const f0X = cx - m1W * 0.5 - 24;
-      const faX = cx + m1W * 0.5 + 24;
+      const f0X = cx - m1W * 0.5 - 22;
+      const faX = cx + m1W * 0.5 + 22;
 
       if (Math.abs(f0Inst) > 0.06) {
         Theme.drawArrow(ctx, f0X, m1Y, f0X, m1Y - f0Inst * fScale, C.copper, 2.5, 9);
       }
-      ctx.fillStyle = C.copper;
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('F₀(t)', f0X - 7, m1Y);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'F', i: true, bold: true },
+          { t: '0', sub: true, bold: true },
+          { t: '(', bold: true },
+          { t: 't', i: true, bold: true },
+          { t: ')', bold: true }
+        ],
+        f0X - 9,
+        m1Y,
+        { size: 12, color: C.copper, align: 'right' }
+      );
 
       if (Math.abs(faInst) > 0.06) {
-        // Reaction force transmitted onto m1 is -Fa (since Fprim - Fa = F0 -> Fprim = F0 + Fa? Wait:
-        // Check sign! On m1: m1 x1'' + k1 x1 = F0 + F_from_absorber.
-        // On ma: ma xa'' = -F_from_absorber -> F_from_absorber = -ma xa'' = +w^2 ma Xa = +mu r^2 Xa/Xst = +Fa!
-        // WAIT: verify! At r=beta, zetaA=0: Xa/Xst = -1/(mu beta^2), so +Fa = mu beta^2 * (-1/(mu beta^2)) = -1 = -F0!
-        // YES! So the reaction force exerted BY the absorber ON m1 is literally +Fa (which equals -F0 at antiresonance)!
         Theme.drawArrow(ctx, faX, m1Y, faX, m1Y - faInst * fScale, C.crimson, 2.5, 9);
       }
-      ctx.fillStyle = C.crimson;
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Fₐ→₁(t)', faX + 7, m1Y);
-
-      // Top status text
-      const isCancelled = res.M1 < 0.08 && Math.abs(sys.rDrive - sys.beta) < 0.08;
-      ctx.fillStyle = isCancelled ? C.teal : C.textMuted;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText(
-        isCancelled
-          ? 'Exact force cancellation: Fₐ→₁(t) = −F₀(t) locks m₁ nearly motionless'
-          : 'Drive ratio r = ω/ω₁ = ' + M.fmt(sys.rDrive, 2) + '  |  Tuning β = ' + M.fmt(sys.beta, 3),
-        12,
-        10
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'F', i: true, bold: true },
+          { t: 'a→1', sub: true, bold: true },
+          { t: '(', bold: true },
+          { t: 't', i: true, bold: true },
+          { t: ')', bold: true }
+        ],
+        faX + 9,
+        m1Y,
+        { size: 12, color: C.crimson, align: 'left' }
       );
+
+      // Top status bar
+      const isCancelled = res.M1 < 0.08 && Math.abs(sys.rDrive - sys.beta) < 0.08;
+      if (isCancelled) {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Exact cancellation: ', bold: true },
+            { t: 'F', i: true, bold: true },
+            { t: 'a→1', sub: true, bold: true },
+            { t: '(t) = −', bold: true },
+            { t: 'F', i: true, bold: true },
+            { t: '0', sub: true, bold: true },
+            { t: '(t) locks ', bold: true },
+            { t: 'm', i: true, bold: true },
+            { t: '1', sub: true, bold: true },
+            { t: ' motionless', bold: true }
+          ],
+          12,
+          16,
+          { size: 11.5, color: C.teal, align: 'left' }
+        );
+      } else {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Drive ratio ', bold: true },
+            { t: 'r', i: true, bold: true },
+            { t: ' = ω/ω', bold: true },
+            { t: '1', sub: true, bold: true },
+            { t: ' = ' + M.fmt(sys.rDrive, 2) + '   |   Tuning β = ' + M.fmt(sys.beta, 3), bold: true }
+          ],
+          12,
+          16,
+          { size: 11.5, color: C.textMuted, align: 'left' }
+        );
+      }
     }
 
     function drawPhasor() {
@@ -224,22 +288,20 @@
       ctx.fillRect(0, 0, w, h);
 
       const res = M.evalTVA(sys.mu, sys.beta, sys.zetaA, sys.rDrive);
-      // Force balance on m1: F0 + F_{a->1} = (k1 - w^2 m1) X1
-      // Normalized by F0: 1 + Fa = Fprim
       const F0 = { re: 1, im: 0 };
       const Fa = res.Fa;
       const Fprim = res.Fprim;
 
       const maxF = Math.min(8.0, Math.max(1.4, M.cAbs(Fa), M.cAbs(Fprim)));
       const range = maxF * 1.28;
-      const pad = 34;
-      const scale = Math.min((w - 2 * pad) / (2 * range), (h - 2 * pad - 24) / (2 * range));
+      const pad = 36;
+      const scale = Math.min((w - 2 * pad) / (2 * range), (h - 2 * pad - 28) / (2 * range));
       const cx = w * 0.5;
       const cy = h * 0.53;
       const toX = (re) => cx + re * scale;
       const toY = (im) => cy - im * scale;
 
-      // Unit reference circle |F/F0| = 1
+      // Unit reference circle |F/F_0| = 1
       ctx.save();
       ctx.strokeStyle = C.grid;
       ctx.lineWidth = 1;
@@ -254,37 +316,42 @@
       ctx.beginPath();
       ctx.moveTo(16, cy);
       ctx.lineTo(w - 16, cy);
-      ctx.moveTo(cx, 28);
-      ctx.lineTo(cx, h - 22);
+      ctx.moveTo(cx, 32);
+      ctx.lineTo(cx, h - 26);
       ctx.stroke();
 
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('Re (F / F₀)', w - 18, cy - 5);
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('Im (F / F₀)', cx + 7, 28);
+      Theme.drawMath(
+        ctx,
+        [{ t: 'Re (', bold: true }, { t: 'F', i: true, bold: true }, { t: '/', bold: true }, { t: 'F', i: true, bold: true }, { t: '0', sub: true, bold: true }, { t: ')', bold: true }],
+        w - 18,
+        cy - 10,
+        { size: 11, color: C.textMuted, align: 'right' }
+      );
+      Theme.drawMath(
+        ctx,
+        [{ t: 'Im (', bold: true }, { t: 'F', i: true, bold: true }, { t: '/', bold: true }, { t: 'F', i: true, bold: true }, { t: '0', sub: true, bold: true }, { t: ')', bold: true }],
+        cx + 8,
+        38,
+        { size: 11, color: C.textMuted, align: 'left' }
+      );
 
-      // Clip extreme near-resonant vectors gracefully
       const clampVec = (v) => {
         const m = M.cAbs(v);
-        if (m <= range * 0.94) return v;
-        const s = (range * 0.94) / m;
+        if (m <= range * 0.92) return v;
+        const s = (range * 0.92) / m;
         return { re: v.re * s, im: v.im * s };
       };
 
       const FaC = clampVec(Fa);
       const FpC = clampVec(Fprim);
 
-      // Draw F0 from origin to (1, 0)
+      // F_0 arrow from origin to (1, 0)
       Theme.drawArrow(ctx, cx, cy, toX(F0.re), toY(F0.im), C.copper, 2.8, 10);
 
-      // Draw Fa head-to-tail from tip of F0 to F0 + Fa = Fprim!
+      // F_{a->1} head-to-tail from tip of F_0 to F_0 + F_{a->1} = F_prim
       Theme.drawArrow(ctx, toX(F0.re), toY(F0.im), toX(FpC.re), toY(FpC.im), C.crimson, 2.6, 10);
 
-      // Ghost copy of Fa from origin
+      // Ghost copy of F_{a->1} from origin
       ctx.save();
       ctx.strokeStyle = C.crimson;
       ctx.globalAlpha = 0.28;
@@ -296,7 +363,7 @@
       ctx.stroke();
       ctx.restore();
 
-      // Resultant primary restoring force Fprim = (1 - r^2) X1 / Xst
+      // Resultant primary restoring force F_prim = (1 - r^2) X_1 / X_st
       if (M.cAbs(Fprim) > 0.03) {
         Theme.drawArrow(ctx, cx, cy, toX(FpC.re), toY(FpC.im), C.blue, 2.8, 10);
       } else {
@@ -306,39 +373,117 @@
         ctx.fill();
       }
 
-      // Labels
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.fillStyle = C.copper;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('F₀ (drive = 1)', toX(0.5), cy + 8);
+      // Vector midpoint labels cleanly offset
+      Theme.drawMath(
+        ctx,
+        [{ t: 'F', i: true, bold: true }, { t: '0', sub: true, bold: true }, { t: ' (= 1)', bold: true }],
+        toX(0.5),
+        cy + 15,
+        { size: 11.5, color: C.copper, align: 'center' }
+      );
 
-      ctx.fillStyle = C.crimson;
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('Fₐ→₁', toX(0.5 * (F0.re + FpC.re)), toY(0.5 * (F0.im + FpC.im)) - 8);
+      // Midpoint of F_{a->1} arrow (from (1,0) to FpC)
+      const faDx = toX(FpC.re) - toX(F0.re);
+      const faDy = toY(FpC.im) - toY(F0.im);
+      const faLen = Math.max(1, Math.hypot(faDx, faDy));
+      const faMidX = 0.5 * (toX(F0.re) + toX(FpC.re));
+      const faMidY = 0.5 * (toY(F0.im) + toY(FpC.im));
+      // Push perpendicular upward/away from F_0
+      let fnx = -faDy / faLen;
+      let fny = faDx / faLen;
+      if (fny > 0) {
+        fnx = -fnx;
+        fny = -fny;
+      }
+      Theme.drawMath(
+        ctx,
+        [{ t: 'F', i: true, bold: true }, { t: 'a→1', sub: true, bold: true }],
+        faMidX + fnx * 16,
+        faMidY + fny * 16,
+        { size: 12, color: C.crimson, align: 'center' }
+      );
 
-      if (M.cAbs(Fprim) > 0.12) {
-        ctx.fillStyle = C.blue;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('(1−r²)X₁', toX(FpC.re) + 7, toY(FpC.im));
+      if (M.cAbs(Fprim) > 0.14) {
+        const fpDx = toX(FpC.re) - cx;
+        const fpDy = toY(FpC.im) - cy;
+        const fpLen = Math.max(1, Math.hypot(fpDx, fpDy));
+        const fpMidX = 0.5 * (cx + toX(FpC.re));
+        const fpMidY = 0.5 * (cy + toY(FpC.im));
+        // Push away from F_0 tip (1, 0)
+        let pnx = -fpDy / fpLen;
+        let pny = fpDx / fpLen;
+        const toTipX = toX(F0.re) - fpMidX;
+        const toTipY = toY(F0.im) - fpMidY;
+        if (pnx * toTipX + pny * toTipY > 0) {
+          pnx = -pnx;
+          pny = -pny;
+        }
+        Theme.drawMath(
+          ctx,
+          [
+            { t: '(1 − ', bold: true },
+            { t: 'r', i: true, bold: true },
+            { t: '2', sup: true, bold: true },
+            { t: ')', bold: true },
+            { t: 'X', i: true, bold: true },
+            { t: '1', sub: true, bold: true }
+          ],
+          fpMidX + pnx * 22,
+          fpMidY + pny * 22,
+          { size: 11.5, color: C.blue, align: 'center' }
+        );
       }
 
-      // Header & footer info
-      ctx.fillStyle = C.text;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.fillText('Force-balance closure on m₁:  F₀ + Fₐ→₁ = (k₁ − ω²m₁)X₁', 12, 10);
-
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(
-        '|Fₐ→₁|/F₀ = ' + M.fmt(M.cAbs(Fa), 2) + '   ∠(Fₐ→₁) = ' + M.fmt((M.cArg(Fa) * 180) / Math.PI, 1) + '°   |X₁|/Xst = ' + M.fmt(res.M1, 3),
+      // Header equation cleanly typeset
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Force balance on ', bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ':  ', bold: true },
+          { t: 'F', i: true, bold: true },
+          { t: '0', sub: true, bold: true },
+          { t: ' + ', bold: true },
+          { t: 'F', i: true, bold: true },
+          { t: 'a→1', sub: true, bold: true },
+          { t: ' = (', bold: true },
+          { t: 'k', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ' − ω', bold: true },
+          { t: '2', sup: true, bold: true },
+          { t: 'm', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ')', bold: true },
+          { t: 'X', i: true, bold: true },
+          { t: '1', sub: true, bold: true }
+        ],
         12,
-        h - 8
+        16,
+        { size: 11.5, color: C.text, align: 'left' }
+      );
+
+      // Footer numeric readout cleanly typeset
+      Theme.drawMath(
+        ctx,
+        [
+          { t: '|' },
+          { t: 'F', i: true },
+          { t: 'a→1', sub: true },
+          { t: '|/' },
+          { t: 'F', i: true },
+          { t: '0', sub: true },
+          { t: ' = ' + M.fmt(M.cAbs(Fa), 2) + '    ∠ = ' + M.fmt((M.cArg(Fa) * 180) / Math.PI, 1) + '°    |' },
+          { t: 'X', i: true },
+          { t: '1', sub: true },
+          { t: '|/' },
+          { t: 'X', i: true },
+          { t: 'st', sub: true },
+          { t: ' = ' + M.fmt(res.M1, 3) }
+        ],
+        12,
+        h - 13,
+        { size: 10.5, color: C.textMuted, align: 'left', family: '"IBM Plex Mono", monospace' }
       );
     }
 

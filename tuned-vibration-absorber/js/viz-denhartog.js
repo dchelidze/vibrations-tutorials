@@ -211,11 +211,17 @@
       drawFixedDot(sys.fp.rQ, sys.fp.MQ, 'Q', true);
 
       // Label M_opt horizontal ceiling
-      ctx.fillStyle = C.teal;
-      ctx.font = '600 10.5px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('M_opt = √(1 + 2/μ) = ' + M.fmt(sys.opt.MOpt, 2), padL + plotW - 8, yOpt - 4);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'M', i: true, bold: true },
+          { t: 'opt', sub: true, bold: true },
+          { t: ' = √(1 + 2/μ) = ' + M.fmt(sys.opt.MOpt, 2), bold: true }
+        ],
+        padL + plotW - 8,
+        yOpt - 10,
+        { size: 10.5, color: C.teal, align: 'right', family: '"IBM Plex Mono", monospace' }
+      );
 
       ctx.restore(); // end clip
 
@@ -225,33 +231,82 @@
       ctx.strokeRect(padL, padT, plotW, plotH);
 
       // Axis titles
-      ctx.fillStyle = C.text;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('Forcing frequency ratio r = ω / ω₁ (drag horizontally to inspect r)', padL + plotW * 0.5, h - 16);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Forcing frequency ratio ', bold: true },
+          { t: 'r', i: true, bold: true },
+          { t: ' = ω / ω', bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: '  (drag horizontally to inspect ', bold: true },
+          { t: 'r', i: true, bold: true },
+          { t: ')', bold: true }
+        ],
+        padL + plotW * 0.5,
+        h - 11,
+        { size: 11.5, color: C.text, align: 'center' }
+      );
 
       ctx.save();
       ctx.translate(16, padT + plotH * 0.5);
       ctx.rotate(-Math.PI / 2);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Primary amplification |X₁| / (F₀/k₁)', 0, 0);
+      Theme.drawMath(
+        ctx,
+        [
+          { t: 'Primary amplification |', bold: true },
+          { t: 'X', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: '| / (', bold: true },
+          { t: 'F', i: true, bold: true },
+          { t: '0', sub: true, bold: true },
+          { t: '/', bold: true },
+          { t: 'k', i: true, bold: true },
+          { t: '1', sub: true, bold: true },
+          { t: ')', bold: true }
+        ],
+        0,
+        0,
+        { size: 11.5, color: C.text, align: 'center' }
+      );
       ctx.restore();
 
       // Top tuning status
       const leveled = Math.abs(sys.fp.MP - sys.fp.MQ) < 0.12;
-      ctx.fillStyle = leveled ? C.teal : C.amber;
-      ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(
-        leveled
-          ? 'Fixed points P and Q leveled at β ≈ β_opt = ' + M.fmt(sys.opt.betaOpt, 3)
-          : 'Fixed points tilted: M(P) = ' + M.fmt(sys.fp.MP, 2) + ' vs. M(Q) = ' + M.fmt(sys.fp.MQ, 2) + ' — tune β toward ' + M.fmt(sys.opt.betaOpt, 3),
-        padL,
-        padT - 7
-      );
+      if (leveled) {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Fixed points ', bold: true },
+            { t: 'P', i: true, bold: true },
+            { t: ' and ', bold: true },
+            { t: 'Q', i: true, bold: true },
+            { t: ' leveled at β ≈ β', bold: true },
+            { t: 'opt', sub: true, bold: true },
+            { t: ' = ' + M.fmt(sys.opt.betaOpt, 3), bold: true }
+          ],
+          padL,
+          padT - 13,
+          { size: 11.5, color: C.teal, align: 'left' }
+        );
+      } else {
+        Theme.drawMath(
+          ctx,
+          [
+            { t: 'Fixed points tilted: ', bold: true },
+            { t: 'M', i: true, bold: true },
+            { t: '(', bold: true },
+            { t: 'P', i: true, bold: true },
+            { t: ') = ' + M.fmt(sys.fp.MP, 2) + ' vs. ', bold: true },
+            { t: 'M', i: true, bold: true },
+            { t: '(', bold: true },
+            { t: 'Q', i: true, bold: true },
+            { t: ') = ' + M.fmt(sys.fp.MQ, 2) + ' — tune β toward ' + M.fmt(sys.opt.betaOpt, 3), bold: true }
+          ],
+          padL,
+          padT - 13,
+          { size: 11.5, color: C.amber, align: 'left' }
+        );
+      }
     }
 
     if (canvas) {

@@ -70,20 +70,23 @@
   function syncControls() {
     const s = app.sys;
     const pairs = [
-      ['slider-mu', 'val-mu', s.mu, '', 2],
-      ['slider-beta', 'val-beta', s.beta, '', 3],
-      ['slider-zeta', 'val-zeta', s.zetaA, '', 3],
-      ['slider-rdrive', 'val-rdrive', s.rDrive, '', 2],
-      ['slider-sec1-r', 'val-sec1-r', s.rDrive, 'r = ', 2],
-      ['slider-sec2-beta', 'val-sec2-beta', s.beta, 'β = ', 3],
-      ['slider-sec2-zeta', 'val-sec2-zeta', s.zetaA, 'ζₐ = ', 3],
-      ['slider-sec3-mu', 'val-sec3-mu', s.mu, 'μ = ', 2]
+      ['slider-mu', 'val-mu', s.mu, '', 2, false],
+      ['slider-beta', 'val-beta', s.beta, '', 3, false],
+      ['slider-zeta', 'val-zeta', s.zetaA, '', 3, false],
+      ['slider-rdrive', 'val-rdrive', s.rDrive, '', 2, false],
+      ['slider-sec1-r', 'val-sec1-r', s.rDrive, 'r = ', 2, false],
+      ['slider-sec2-beta', 'val-sec2-beta', s.beta, 'β = ', 3, false],
+      ['slider-sec2-zeta', 'val-sec2-zeta', s.zetaA, '&zeta;<sub>a</sub> = ', 3, true],
+      ['slider-sec3-mu', 'val-sec3-mu', s.mu, 'μ = ', 2, false]
     ];
-    for (const [sid, vid, val, prefix, dec] of pairs) {
+    for (const [sid, vid, val, prefix, dec, isHtml] of pairs) {
       const sl = document.getElementById(sid);
       const vl = document.getElementById(vid);
       if (sl) sl.value = val;
-      if (vl) vl.textContent = prefix + M.fmt(val, dec);
+      if (vl) {
+        if (isHtml) vl.innerHTML = prefix + M.fmt(val, dec);
+        else vl.textContent = prefix + M.fmt(val, dec);
+      }
     }
   }
 
@@ -119,13 +122,13 @@
     const k2 = document.getElementById('sec1-fa');
     const k3 = document.getElementById('sec1-split');
 
-    if (k1) renderTex(k1, '|X_1|/X_{\\mathrm{st}} = ' + M.fmt(res.M1, 3), false);
+    if (k1) renderTex(k1, '|X_1|/X_{\\mathrm{st}} = ' + M.fmtTex(res.M1, 3), false);
     if (k2) {
       const ang = (M.cArg(res.Fa) * 180) / Math.PI;
-      renderTex(k2, '|F_{a\\to 1}|/F_0 = ' + M.fmt(M.cAbs(res.Fa), 2) + ',\\; \\angle = ' + M.fmt(ang, 0) + '^\\circ', false);
+      renderTex(k2, '|F_{a\\to 1}|/F_0 = ' + M.fmtTex(M.cAbs(res.Fa), 2) + ',\\; \\angle = ' + M.fmtTex(ang, 0) + '^\\circ', false);
     }
     if (k3) {
-      renderTex(k3, 'r_1 = ' + M.fmt(s.split.r1, 3) + ',\\; r_2 = ' + M.fmt(s.split.r2, 3), false);
+      renderTex(k3, 'r_1 = ' + M.fmtTex(s.split.r1, 3) + ',\\; r_2 = ' + M.fmtTex(s.split.r2, 3), false);
     }
   }
 
@@ -136,19 +139,19 @@
     const kOpt = document.getElementById('sec2-opt');
     const kPeak = document.getElementById('sec2-peak');
 
-    if (kP) renderTex(kP, 'r_P = ' + M.fmt(s.fp.rP, 3) + ',\\; M_P = ' + M.fmt(s.fp.MP, 2), false);
-    if (kQ) renderTex(kQ, 'r_Q = ' + M.fmt(s.fp.rQ, 3) + ',\\; M_Q = ' + M.fmt(s.fp.MQ, 2), false);
+    if (kP) renderTex(kP, 'r_P = ' + M.fmtTex(s.fp.rP, 3) + ',\\; M_P = ' + M.fmtTex(s.fp.MP, 2), false);
+    if (kQ) renderTex(kQ, 'r_Q = ' + M.fmtTex(s.fp.rQ, 3) + ',\\; M_Q = ' + M.fmtTex(s.fp.MQ, 2), false);
     if (kOpt) {
       renderTex(
         kOpt,
-        '\\beta_{\\mathrm{opt}} = ' + M.fmt(s.opt.betaOpt, 3) + ',\\; \\zeta_{a,\\mathrm{opt}} = ' + M.fmt(s.opt.zetaAOpt, 3),
+        '\\beta_{\\mathrm{opt}} = ' + M.fmtTex(s.opt.betaOpt, 3) + ',\\; \\zeta_{a,\\mathrm{opt}} = ' + M.fmtTex(s.opt.zetaAOpt, 3),
         false
       );
     }
     if (kPeak) {
       renderTex(
         kPeak,
-        'M_{\\max} = ' + M.fmt(s.peakInfo.peak, 2) + '\\;(\\text{floor } ' + M.fmt(s.opt.MOpt, 2) + ')',
+        'M_{\\max} = ' + M.fmtTex(s.peakInfo.peak, 2) + '\\;(\\text{floor } ' + M.fmtTex(s.opt.MOpt, 2) + ')',
         false
       );
     }
@@ -196,9 +199,15 @@
     const kBound = document.getElementById('sec3-bound');
     const kStroke = document.getElementById('sec3-stroke');
 
-    if (kBw) kBw.textContent = M.fmt(bw, 1) + '% of ω₁ (r₁=' + M.fmt(sp1.r1, 2) + ', r₂=' + M.fmt(sp1.r2, 2) + ')';
-    if (kBound) renderTex(kBound, 'M_{\\mathrm{opt}} = \\sqrt{1 + 2/\\mu} = ' + M.fmt(s.opt.MOpt, 2), false);
-    if (kStroke) renderTex(kStroke, '|X_a(r=\\beta)| / X_{\\mathrm{st}} = \\frac{1}{\\mu\\beta^2} = ' + M.fmt(notchStroke, 2), false);
+    if (kBw) {
+      renderTex(
+        kBw,
+        M.fmtTex(bw, 1) + '\\%\\text{ of }\\omega_1\\;(r_1=' + M.fmtTex(sp1.r1, 2) + ',\\,r_2=' + M.fmtTex(sp1.r2, 2) + ')',
+        false
+      );
+    }
+    if (kBound) renderTex(kBound, 'M_{\\mathrm{opt}} = \\sqrt{1 + 2/\\mu} = ' + M.fmtTex(s.opt.MOpt, 2), false);
+    if (kStroke) renderTex(kStroke, '|X_a(r=\\beta)| / X_{\\mathrm{st}} = \\frac{1}{\\mu\\beta^2} = ' + M.fmtTex(notchStroke, 2), false);
   }
 
   function updateSection4Readouts() {
@@ -219,7 +228,7 @@
     const kIso = document.getElementById('sec4-iso');
     const kSlope = document.getElementById('sec4-slope');
 
-    if (kT) renderTex(kT, 'T = ' + M.fmt(res.T, 3) + '\\;(' + M.fmt(20 * Math.log10(Math.max(1e-4, res.T)), 1) + '\\;\\text{dB})', false);
+    if (kT) renderTex(kT, 'T = ' + M.fmtTex(res.T, 3) + '\\;(' + M.fmtTex(20 * Math.log10(Math.max(1e-4, res.T)), 1) + '\\;\\text{dB})', false);
     if (kIso) {
       kIso.textContent =
         res.T < 1
@@ -227,8 +236,8 @@
           : M.fmt((res.T - 1) * 100, 1) + '% amplification';
     }
     if (kSlope) {
-      const Tundamp = Math.abs(1 / (1 - st.r * st.r));
-      renderTex(kSlope, 'T_{\\zeta=0} = ' + M.fmt(Tundamp, 3) + '\\;\\text{vs.}\\; T_{\\zeta} = ' + M.fmt(res.T, 3), false);
+      const Tundamp = Math.abs(1 - st.r * st.r) < 1e-6 ? Infinity : Math.abs(1 / (1 - st.r * st.r));
+      renderTex(kSlope, 'T_{\\zeta=0} = ' + M.fmtTex(Tundamp, 3) + '\\;\\text{vs.}\\; T_{\\zeta} = ' + M.fmtTex(res.T, 3), false);
     }
   }
 

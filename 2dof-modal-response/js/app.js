@@ -104,7 +104,7 @@
     const sec5Slider = document.getElementById('slider-sec5-cloc');
     const sec5Val = document.getElementById('val-sec5-cloc');
     if (sec5Slider) sec5Slider.value = p.cLoc;
-    if (sec5Val) sec5Val.textContent = 'c_loc = ' + M.fmt(p.cLoc, 2) + ' N·s/m';
+    if (sec5Val) sec5Val.innerHTML = '<i>c</i><sub>loc</sub> = ' + M.fmt(p.cLoc, 2) + ' N·s/m';
 
     document.querySelectorAll('#damp-site-pills .pill').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.site === p.locSite);

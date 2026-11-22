@@ -246,12 +246,45 @@
       ctx.lineTo(cx, h - 22);
       ctx.stroke();
 
-      // Right-angle transmitted force triangle: F_T = F_spring + F_damp (F_damp is 90 deg ahead of F_spring!)
-      Theme.drawArrow(ctx, cx, cy, toX(Fs.re), toY(Fs.im), C.blue, 2.5, 9);
-      Theme.drawArrow(ctx, toX(Fs.re), toY(Fs.im), toX(Ft.re), toY(Ft.im), C.teal, 2.5, 9);
-      Theme.drawArrow(ctx, cx, cy, toX(Ft.re), toY(Ft.im), C.copper, 3.0, 10);
+      // Right-angle square marker at vertex Fs between kX and i c*w*X
+      const fsPixX = toX(Fs.re);
+      const fsPixY = toY(Fs.im);
+      const ftPixX = toX(Ft.re);
+      const ftPixY = toY(Ft.im);
 
-      // Reference drive F0 = 1 along +Re
+      const e1x = fsPixX - cx;
+      const e1y = fsPixY - cy;
+      const e1L = Math.hypot(e1x, e1y);
+      const e2x = ftPixX - fsPixX;
+      const e2y = ftPixY - fsPixY;
+      const e2L = Math.hypot(e2x, e2y);
+      const e3x = ftPixX - cx;
+      const e3y = ftPixY - cy;
+      const e3L = Math.hypot(e3x, e3y);
+
+      if (e1L > 22 && e2L > 22) {
+        const sq = Math.min(10, e1L * 0.22, e2L * 0.22);
+        const u1x = -e1x / e1L;
+        const u1y = -e1y / e1L;
+        const u2x = e2x / e2L;
+        const u2y = e2y / e2L;
+        ctx.save();
+        ctx.strokeStyle = C.textMuted;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(fsPixX + u1x * sq, fsPixY + u1y * sq);
+        ctx.lineTo(fsPixX + (u1x + u2x) * sq, fsPixY + (u1y + u2y) * sq);
+        ctx.lineTo(fsPixX + u2x * sq, fsPixY + u2y * sq);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Right-angle transmitted force triangle: F_T = kX + i c w X
+      Theme.drawArrow(ctx, cx, cy, fsPixX, fsPixY, C.blue, 2.5, 9);
+      Theme.drawArrow(ctx, fsPixX, fsPixY, ftPixX, ftPixY, C.teal, 2.5, 9);
+      Theme.drawArrow(ctx, cx, cy, ftPixX, ftPixY, C.copper, 3.0, 10);
+
+      // Reference drive F_0 = 1 along +Re
       ctx.save();
       ctx.strokeStyle = C.ref;
       ctx.setLineDash([3, 3]);
@@ -260,44 +293,59 @@
       ctx.moveTo(cx, cy);
       ctx.lineTo(toX(1), cy);
       ctx.stroke();
-      ctx.fillStyle = C.ref;
-      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('F₀=1', toX(1), cy + 5);
       ctx.restore();
+      Theme.drawMath(
+        ctx,
+        [{ t: 'F', i: true }, { t: '0', sub: true }, { t: ' = 1' }],
+        toX(1),
+        cy + 12,
+        { size: 10.5, color: C.ref, align: 'center', family: '"IBM Plex Mono", monospace' }
+      );
 
-      // Labels placed cleanly along outward normals so vectors never overlap
-      ctx.font = '600 11px "IBM Plex Sans", sans-serif';
-      const fsLen = Math.max(1e-4, M.cAbs(Fs));
-      const fdLen = Math.max(1e-4, M.cAbs(Fd));
-      const ftLen = Math.max(1e-4, M.cAbs(Ft));
+      // Midpoint vector labels strictly OUTSIDE the right triangle O -> Fs -> Ft -> O!
+      // Because Fd = +i (2*zeta*r) Fs is always +90 deg CCW from Fs in math coords,
+      // the outward normal of directed edge (dx, dy) in canvas coords is (-dy/L, +dx/L)
+      // for O->Fs and Fs->Ft, and (+dy/L, -dx/L) for the hypotenuse O->Ft!
+      if (e1L > 14) {
+        const mx = 0.5 * (cx + fsPixX);
+        const my = 0.5 * (cy + fsPixY);
+        const off = 16;
+        Theme.drawMath(
+          ctx,
+          [{ t: 'kX', i: true, bold: true }],
+          mx + (-e1y / e1L) * off,
+          my + (e1x / e1L) * off,
+          { size: 12, color: C.blue, align: 'center' }
+        );
+      }
 
-      // kX label offset perpendicular to Fs (away from Fd)
-      const fsMidX = toX(Fs.re * 0.52);
-      const fsMidY = toY(Fs.im * 0.52);
-      const fsOffX = (Fs.im / fsLen) * 14;
-      const fsOffY = (Fs.re / fsLen) * 14;
-      ctx.fillStyle = C.blue;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('kX', fsMidX + fsOffX, fsMidY + fsOffY);
+      if (e2L > 14) {
+        const mx = 0.5 * (fsPixX + ftPixX);
+        const my = 0.5 * (fsPixY + ftPixY);
+        const off = 22;
+        Theme.drawMath(
+          ctx,
+          [{ t: 'i', bold: true }, { t: ' cωX', i: true, bold: true }],
+          mx + (-e2y / e2L) * off,
+          my + (e2x / e2L) * off,
+          { size: 11.5, color: C.teal, align: 'center' }
+        );
+      }
 
-      // i cωX label offset outward from midpoint of Fd
-      const fdMidX = toX(Fs.re + Fd.re * 0.52);
-      const fdMidY = toY(Fs.im + Fd.im * 0.52);
-      const fdOffX = (Fd.im / fdLen) * 20;
-      const fdOffY = (Fd.re / fdLen) * 20;
-      ctx.fillStyle = C.teal;
-      ctx.fillText('i cωX', fdMidX + fdOffX, fdMidY + fdOffY);
+      if (e3L > 14) {
+        const mx = 0.5 * (cx + ftPixX);
+        const my = 0.5 * (cy + ftPixY);
+        const off = 16;
+        Theme.drawMath(
+          ctx,
+          [{ t: 'F', i: true, bold: true }, { t: 'T', sub: true, bold: true }],
+          mx + (e3y / e3L) * off,
+          my + (-e3x / e3L) * off,
+          { size: 12, color: C.copper, align: 'center' }
+        );
+      }
 
-      // F_T label beyond arrowhead along radial direction
-      const ftTipX = toX(Ft.re) + (Ft.re / ftLen) * 16;
-      const ftTipY = toY(Ft.im) - (Ft.im / ftLen) * 16;
-      ctx.fillStyle = C.copper;
-      ctx.fillText('F_T', ftTipX, ftTipY);
-
-      // Header & footer
+      // Header & footer cleanly typeset
       ctx.fillStyle = res.T < 1 ? C.teal : C.crimson;
       ctx.font = '600 11.5px "IBM Plex Sans", sans-serif';
       ctx.textAlign = 'left';
@@ -310,14 +358,32 @@
         10
       );
 
-      ctx.fillStyle = C.textMuted;
-      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(
-        '|kX|/F₀=' + M.fmt(M.cAbs(Fs), 2) + '  |cωX|/F₀=' + M.fmt(M.cAbs(Fd), 2) + '  T=|F_T|/F₀=' + M.fmt(res.T, 3),
+      Theme.drawMath(
+        ctx,
+        [
+          { t: '|' },
+          { t: 'kX', i: true },
+          { t: '|/' },
+          { t: 'F', i: true },
+          { t: '0', sub: true },
+          { t: ' = ' + M.fmt(M.cAbs(Fs), 2) + '   |' },
+          { t: 'cωX', i: true },
+          { t: '|/' },
+          { t: 'F', i: true },
+          { t: '0', sub: true },
+          { t: ' = ' + M.fmt(M.cAbs(Fd), 2) + '   ' },
+          { t: 'T', i: true },
+          { t: ' = |' },
+          { t: 'F', i: true },
+          { t: 'T', sub: true },
+          { t: '|/' },
+          { t: 'F', i: true },
+          { t: '0', sub: true },
+          { t: ' = ' + M.fmt(res.T, 3) }
+        ],
         12,
-        h - 8
+        h - 12,
+        { size: 10.5, color: C.textMuted, align: 'left', family: '"IBM Plex Mono", monospace' }
       );
     }
 
