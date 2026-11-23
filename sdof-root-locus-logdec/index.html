@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viscous Free-Response Root Locus &amp; Logarithmic Decrement — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\delta$</div>
+        <div>
+          <span class="brand-title">Root locus &amp; logarithmic decrement</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-locus">1. $s$-plane locus</a>
+        <a href="#sec-logdec">2. Log decrement</a>
+        <a href="#sec-approx">3. Exact vs. approx</a>
+        <a href="#sec-summary">4. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 11</div>
+      <div class="copper-bar"></div>
+      <h1>Viscous free-response root locus and logarithmic decrement identification</h1>
+      <p class="hero-lead">
+        Sweeping the damping ratio $\zeta$ from $0$ to $2$ moves the characteristic poles of
+        $s^2 + 2\zeta\omega_{\mathrm{n}} s + \omega_{\mathrm{n}}^2 = 0$ along an exact
+        <span class="c-blue-hero">semicircle of radius $\omega_{\mathrm{n}}$</span>, collides them at the
+        <span class="c-teal-hero">critical double pole $-\omega_{\mathrm{n}}$</span>, and splits them along the
+        <span class="c-orange-hero">negative real axis</span>. For underdamped ring-downs, connect the pole angle
+        $\cos\theta = \zeta$ directly to <span class="c-crimson-hero">logarithmic decrement $\delta$</span> and
+        multi-cycle semilog peak regression.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select damping regime preset">
+          <button class="pill active" data-preset="light_under" type="button">Light ($\zeta=0.08$)</button>
+          <button class="pill" data-preset="noisy_lab" type="button">Noisy lab ($\zeta=0.12, \sigma=5\%$)</button>
+          <button class="pill" data-preset="heavy_under" type="button">Heavy under ($\zeta=0.45$)</button>
+          <button class="pill" data-preset="critical" type="button">Critical ($\zeta=1.00$)</button>
+          <button class="pill" data-preset="overdamped" type="button">Overdamped ($\zeta=1.60$)</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc"></p>
+      </div>
+    </div>
+  </section>
+
+  <main class="page-wrap">
+
+    <section class="lesson-section" id="sec-locus">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Characteristic root geometry</span>
+        <h2>1. Semicircular $s$-plane root locus ($\zeta \le 1$) and real-axis split ($\zeta > 1$)</h2>
+        <p>
+          For $0 \le \zeta \le 1$, the poles lie at $s_{1,2} = -\zeta\omega_{\mathrm{n}} \pm \mathrm{i}\omega_{\mathrm{d}}$
+          with constant distance $|s_{1,2}| = \omega_{\mathrm{n}}$ from the origin and polar angle $\theta = \arccos(\zeta)$
+          from the negative real axis. Above $\zeta = 1$, Vieta's product $s_1 s_2 = \omega_{\mathrm{n}}^2$ forces the slow
+          pole toward $0^-$ as the fast pole races to $-\infty$, slowing down settling relative to $\zeta = 1$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-roots"></div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex $s$-plane root locus</strong>
+              <span>Dashed blue: $|s| = \omega_{\mathrm{n}}$ semicircle · Orange: overdamped branch</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="locus-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Free response $x(t)$ from $x(0)=1,\, \dot{x}(0)=0$</strong>
+              <span>Copper dashed: $\pm A e^{-\zeta\omega_{\mathrm{n}} t}$ envelope · Blue line: 2% settling time</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="wave-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-zeta">Damping ratio $\zeta$</label>
+            <input id="slider-zeta" class="range-copper" type="range" min="0.02" max="2.00" step="0.01" value="0.08" />
+            <span class="scrubber-val" id="val-zeta">ζ = 0.08</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-wn">Natural frequency $\omega_{\mathrm{n}}$</label>
+            <input id="slider-wn" class="range-teal" type="range" min="1.0" max="4.0" step="0.1" value="2.0" />
+            <span class="scrubber-val" id="val-wn">ωₙ = 2.0 rad/s</span>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Characteristic poles $s_{1,2}$</div>
+            <div class="kpi-val c-crimson" id="stat-poles">-0.16 ± 1.99i</div>
+            <div class="kpi-sub" id="stat-regime">Underdamped (θ = 85.4°)</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">2% settling time $t_s$</div>
+            <div class="kpi-val c-blue" id="stat-ts">24.0 s</div>
+            <div class="kpi-sub">Last crossing of $\pm 0.02\,x_0$ band</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Exact log decrement $\delta$</div>
+            <div class="kpi-val c-teal" id="stat-delta">0.504</div>
+            <div class="kpi-sub">Geometric relation $\delta = 2\pi\cot\theta$</div>
+          </div>
+        </div>
+
+        <div id="regime-insight" class="callout"></div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-logdec">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Experimental damping identification</span>
+        <h2>2. Multi-cycle semilog peak regression rejects measurement noise</h2>
+        <p>
+          For $x(0) = x_0, \dot{x}(0) = 0$, consecutive positive peaks occur exactly at $t_k = k T_{\mathrm{d}}$ with
+          $x_k = x_0 e^{-k\delta}$, so $\ln(x_k / x_0) = -k\delta$ is a straight line of slope $-\delta$. Add synthetic
+          measurement noise $\sigma$ below to compare a noisy single peak pair $\ln(x_0/x_1)$ against multi-cycle
+          ordinary least-squares (OLS) regression.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-logdec"></div>
+
+        <div class="scrubber-bar" style="margin-bottom: 12px;">
+          <label for="slider-noise">Synthetic peak measurement noise $\sigma$</label>
+          <input id="slider-noise" type="range" min="0.00" max="0.08" step="0.005" value="0.00" />
+          <span class="scrubber-val" id="val-noise">σ = 0%</span>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Sampled ring-down peaks $x_k$</strong>
+              <span>Crimson dots: measured positive peaks</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="peaks-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Semilog linear regression $\ln(x_k/x_0)$ vs. $k$</strong>
+              <span>Teal solid: OLS fit · Dashed blue: exact · Amber: single pair</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="reg-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Multi-cycle OLS $\hat{\zeta}_{\mathrm{OLS}}$</div>
+            <div class="kpi-val c-teal" id="stat-zols">0.080</div>
+            <div class="kpi-sub">Inverted via exact $\delta/\sqrt{4\pi^2+\delta^2}$</div>
+          </div>
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Single-pair estimate $\hat{\zeta}_1$</div>
+            <div class="kpi-val c-orange" id="stat-z1">0.080</div>
+            <div class="kpi-sub">From $\ln(x_0/x_1)$ alone — noise-sensitive</div>
+          </div>
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Small-damping approx $\delta_{\mathrm{fit}}/(2\pi)$</div>
+            <div class="kpi-val c-blue" id="stat-zapprox">0.080</div>
+            <div class="kpi-sub">Overestimates $\zeta$ once $\zeta &gt; 0.30$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-approx">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Accuracy limits &amp; settling tradeoff</span>
+        <h2>3. When $\delta/(2\pi)$ breaks down, and why overdamping settles slower than critical</h2>
+        <p>
+          Left: $\delta = 2\pi\zeta / \sqrt{1 - \zeta^2}$ curves sharply upward above $\zeta \approx 0.30$, where the
+          textbook linear approximation $\delta \approx 2\pi\zeta$ crosses $5\%$ error. Right: the dimensionless $2\%$
+          settling time $\omega_{\mathrm{n}} t_s(\zeta)$ reaches its minimum between $\zeta \approx 0.70$ and $1.0$
+          before climbing steadily in the overdamped region due to the slow pole $s_1 \approx -\omega_{\mathrm{n}}/(2\zeta)$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Exact $\delta(\zeta)$ vs. small-damping $2\pi\zeta$</strong>
+              <span>Teal shaded zone: linear formula within $5\%$</span>
+            </div>
+            <div class="canvas-box h-sens">
+              <canvas id="approx-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Dimensionless $2\%$ settling time $\omega_{\mathrm{n}} t_s(\zeta)$</strong>
+              <span>Crimson dot: active $\zeta$ · Dashed teal: critical $\zeta = 1$</span>
+            </div>
+            <div class="canvas-box h-sens">
+              <canvas id="settle-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Reproducible MATLAB verification</span>
+        <h2>4. Compute characteristic poles and semilog OLS damping in MATLAB</h2>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 10px;">
+          <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">
+            MATLAB · Root Locus &amp; Logarithmic Decrement Script
+          </span>
+          <button id="btn-copy-code" class="btn btn-sm" type="button">Copy MATLAB</button>
+        </div>
+        <pre class="code-block" id="code-snippet"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; 2026 <a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a> ·
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island · MCE 464 Vibrations
+      </span>
+      <span>Module 11 · Viscous Free-Response Root Locus &amp; Logarithmic Decrement</span>
+    </div>
+  </footer>
+
+  <script src="js/math-rootlocus.js"></script>
+  <script src="js/viz-locus.js"></script>
+  <script src="js/viz-logdec.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

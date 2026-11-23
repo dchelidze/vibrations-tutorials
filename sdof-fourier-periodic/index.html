@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Periodic Forcing, Fourier Epicycles &amp; Subharmonic Resonance — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$c_n$</div>
+        <div>
+          <span class="brand-title">Periodic forcing &amp; Fourier epicycles</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-epicycles">1. Epicycles</a>
+        <a href="#sec-spectrum">2. Spectrum filter</a>
+        <a href="#sec-subharm">3. Subharmonic sweep</a>
+        <a href="#sec-table">4. Harmonics</a>
+        <a href="#sec-summary">5. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 10</div>
+      <div class="copper-bar"></div>
+      <h1>Periodic forcing, Fourier epicycles, and subharmonic resonance</h1>
+      <p class="hero-lead">
+        Any periodic excitation $f(t)$ decomposes into a discrete ladder of harmonic lines at $n\omega_0$. By
+        superposition, a linear SDOF oscillator multiplies each line by its complex transfer function
+        <span class="c-teal-hero">$H(\mathrm{i}nr_0)$</span>—causing dramatic
+        <span class="c-crimson-hero">subharmonic resonance</span> whenever a higher harmonic lands on
+        <span class="c-orange-hero">$n r_0 = 1$</span>, even when the drive itself repeats at a fraction of $\omega_{\mathrm{n}}$.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select periodic forcing preset">
+          <button class="pill active" data-preset="square_third" type="button">Square ($r_0 = 1/3$)</button>
+          <button class="pill" data-preset="saw_half" type="button">Sawtooth ($r_0 = 1/2$)</button>
+          <button class="pill" data-preset="halfrect_half" type="button">Half-rectified ($r_0 = 1/2$)</button>
+          <button class="pill" data-preset="square_fund" type="button">Square ($r_0 = 1$)</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc"></p>
+      </div>
+    </div>
+  </section>
+
+  <main class="page-wrap">
+
+    <section class="lesson-section" id="sec-epicycles">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Rotating Fourier epicycles</span>
+        <h2>1. Tip-to-tail rotating harmonics synthesize the filtered periodic steady state</h2>
+        <p>
+          Each harmonic $n$ rotates at angular speed $n\omega_0$ with radius $c_n |H(\mathrm{i}nr_0)|$ and phase lag
+          $\phi_n$. When $n r_0 \approx 1$ for a nonzero input harmonic, that single circle inflates and dominates the
+          epicycle chain—driving the mass at $n$ cycles per input period.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-fourier"></div>
+
+        <div class="controls-row" style="margin-bottom: 12px;">
+          <div class="pill-group" id="wave-selector" role="group" aria-label="Waveform selector">
+            <button class="pill active" data-wave="square" type="button">Square (odd)</button>
+            <button class="pill" data-wave="sawtooth" type="button">Sawtooth (all)</button>
+            <button class="pill" data-wave="halfrect" type="button">Half-rectified (DC+even)</button>
+            <button class="pill" data-wave="triangle" type="button">Triangle ($1/n^2$)</button>
+          </div>
+          <div class="controls-group">
+            <button class="btn btn-sm" data-jump-r0="0.20" type="button">$r_0 = 1/5$</button>
+            <button class="btn btn-sm" data-jump-r0="0.3333" type="button">$r_0 = 1/3$</button>
+            <button class="btn btn-sm" data-jump-r0="0.50" type="button">$r_0 = 1/2$</button>
+            <button class="btn btn-sm" data-jump-r0="1.00" type="button">$r_0 = 1$</button>
+            <button id="btn-play" class="btn btn-primary btn-sm" type="button">Pause epicycles</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Filtered output epicycle chain</strong>
+              <span>Dominant circle highlighted in crimson</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="epi-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Periodic input $f_N(\theta)$ vs. SDOF response $x_{\mathrm{ss}}(\theta)$</strong>
+              <span>Two full fundamental drive cycles</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="wave-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-r0">Fundamental ratio $r_0 = \omega_0 / \omega_{\mathrm{n}}$</label>
+            <input id="slider-r0" class="range-copper" type="range" min="0.15" max="1.80" step="0.005" value="0.333" />
+            <span class="scrubber-val" id="val-r0">r₀ = 0.333</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-zeta">Damping ratio $\zeta$</label>
+            <input id="slider-zeta" class="range-teal" type="range" min="0.03" max="0.60" step="0.01" value="0.06" />
+            <span class="scrubber-val" id="val-zeta">ζ = 0.06</span>
+          </div>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-n">Fourier truncation order $N$ (harmonics)</label>
+          <input id="slider-n" type="range" min="1" max="15" step="1" value="9" />
+          <span class="scrubber-val" id="val-n">N = 9</span>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Input RMS $F_{\mathrm{rms}}$</div>
+            <div class="kpi-val c-blue" id="stat-frms">0.980</div>
+            <div class="kpi-sub">Total RMS gain: <strong id="stat-gain">3.62×</strong></div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Output RMS $X_{\mathrm{rms}}$</div>
+            <div class="kpi-val c-crimson" id="stat-xrms">3.545</div>
+            <div class="kpi-sub">Exact Parseval sum over $n = 0 \dots N$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Dominant output harmonic</div>
+            <div class="kpi-val c-teal" id="stat-dom">n = 3 (rₙ = 1.00)</div>
+            <div class="kpi-sub">Highest amplitude term in $x_{\mathrm{ss}}(t)$</div>
+          </div>
+        </div>
+
+        <div id="regime-insight" class="callout"></div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-spectrum">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Mechanical frequency-domain filtering</span>
+        <h2>2. The SDOF FRF $|H(\mathrm{i}r)|$ acts as a mechanical bandpass selector on discrete input lines</h2>
+        <p>
+          In the frequency domain, periodic forcing is a comb of discrete lines spaced by $r_0$. Multiplying each line
+          by the continuous SDOF receptance $|H(\mathrm{i}r)|$ produces the output bar chart on the right: whichever
+          nonzero harmonic falls nearest to $r = 1$ receives amplification $\approx 1/(2\zeta)$, while high harmonics
+          are crushed by the $1/r^2$ tail.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-parseval"></div>
+        <div class="grid-2" style="margin-top: 12px;">
+          <div>
+            <div class="canvas-caption">
+              <strong>Input line spectrum $c_n$ &amp; FRF envelope</strong>
+              <span>Crimson stem: harmonic landing inside resonance peak</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="spec-in-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Filtered output line spectrum $c_n |H(\mathrm{i}nr_0)|$</strong>
+              <span>Teal bar: static DC term $a_0/2$ (if present)</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="spec-out-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-subharm">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Subharmonic resonance landscape</span>
+        <h2>3. Sweeping $r_0$ uncovers a forest of subharmonic peaks at $r_0 = 1/n$</h2>
+        <p>
+          Plotting total output RMS $X_{\mathrm{rms}}(r_0)$ reveals why non-sinusoidal periodic machinery can resonate
+          at fractions of its natural frequency—and why waveform symmetry matters: a square wave has peaks only at odd
+          reciprocals ($1/5, 1/3, 1$), a half-rectified pulse skips $1/3$ while lighting up $1/2$, and a sawtooth lights
+          up every integer reciprocal $1/n$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="canvas-caption">
+          <strong>Total RMS steady-state response $X_{\mathrm{rms}}(r_0)$</strong>
+          <span>Use the quick-jump buttons above or drag $r_0$ to visit each peak</span>
+        </div>
+        <div class="canvas-box h-unbal">
+          <canvas id="sweep-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-table">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Term-by-term harmonic audit</span>
+        <h2>4. Live harmonic breakdown and Parseval energy share</h2>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Harmonic $n$</th>
+                <th>Ratio $r_n = n r_0$</th>
+                <th>Input $c_n$</th>
+                <th>Gain $|H(\mathrm{i}r_n)|$</th>
+                <th>Phase $\phi_n$</th>
+                <th>Output $c_n|H|$</th>
+                <th>Energy share</th>
+              </tr>
+            </thead>
+            <tbody id="harm-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Reproducible MATLAB verification</span>
+        <h2>5. Synthesize periodic Fourier responses in MATLAB</h2>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 10px;">
+          <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">
+            MATLAB · Periodic Forcing &amp; Subharmonic Resonance Script
+          </span>
+          <button id="btn-copy-code" class="btn btn-sm" type="button">Copy MATLAB</button>
+        </div>
+        <pre class="code-block" id="code-snippet"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; 2026 <a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a> ·
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island · MCE 464 Vibrations
+      </span>
+      <span>Module 10 · Periodic Forcing, Fourier Epicycles &amp; Subharmonic Resonance</span>
+    </div>
+  </footer>
+
+  <script src="js/math-fourier.js"></script>
+  <script src="js/viz-epicycles.js"></script>
+  <script src="js/viz-spectrum.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
