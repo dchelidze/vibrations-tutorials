@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Damping Mechanisms, Hysteresis Loops &amp; Coulomb Stick-Slip — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$\eta$</div>
+        <div>
+          <span class="brand-title">Hysteresis &amp; Coulomb damping</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-loops">1. Hysteresis loops</a>
+        <a href="#sec-scaling">2. Scaling</a>
+        <a href="#sec-stickslip">3. Stick-slip</a>
+        <a href="#sec-frf">4. Forced FRF</a>
+        <a href="#sec-table">5. Comparison</a>
+        <a href="#sec-summary">6. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 08</div>
+      <div class="copper-bar"></div>
+      <h1>Damping mechanisms in the force–displacement plane: hysteresis loops and Coulomb stick-slip</h1>
+      <p class="hero-lead">
+        Energy lost in one oscillation cycle equals the area $\Delta E_d = \oint f_d\,\mathrm{d}x$ enclosed by the
+        hysteresis loop. We compare <span class="c-blue-hero">viscous damping</span> (ellipse growing with $\omega$),
+        <span class="c-teal-hero">structural/hysteretic damping</span> (frequency-independent ellipse), and
+        <span class="c-crimson-hero">Coulomb dry friction</span> (rectangle, $1/X$ equivalent damping, and
+        <span class="c-orange-hero">finite-time stick-slip termination</span> in the phase plane).
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select damping comparison preset">
+          <button class="pill active" data-preset="matched_r1" type="button">Matched at $r=1, X=1$</button>
+          <button class="pill" data-preset="high_freq" type="button">High frequency ($r = 2.2$)</button>
+          <button class="pill" data-preset="small_amp" type="button">Small amplitude ($X = 0.35$)</button>
+          <button class="pill" data-preset="strong_stick" type="button">Strong stick-slip ($\delta = 0.32$)</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc-text"></p>
+      </div>
+    </div>
+  </section>
+
+  <main class="page-wrap">
+
+    <section class="lesson-section" id="sec-loops">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Hysteresis geometry</span>
+        <h2>1. Enclosed area in the force–displacement plane measures energy dissipated per cycle</h2>
+        <p>
+          For harmonic motion $x(t) = X\sin(\omega t)$, plotting the damping force $f_d$ against $x$ reveals three
+          distinct geometries: a viscous ellipse ($f_d = c\dot{x}$), a frequency-independent structural ellipse
+          ($f_d = (\eta k/\omega)\dot{x}$), and a Coulomb dry-friction rectangle ($f_d = F_c\operatorname{sgn}\dot{x}$).
+          Adding the linear spring force $kx$ tilts all three loops around the dashed line $f = kx$ without changing
+          their enclosed areas.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Pure damping loop $(x, f_d)$</strong>
+              <span>Area $= \Delta E_d$ per cycle</span>
+            </div>
+            <div class="canvas-box h-loop">
+              <canvas id="damp-pure-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Total restoring + damping loop $(x, kx + f_d)$</strong>
+              <span>Dashed gray: conservative spring $f = kx$</span>
+            </div>
+            <div class="canvas-box h-loop">
+              <canvas id="damp-total-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-r">Frequency ratio $r = \omega / \omega_{\mathrm{n}}$</label>
+            <input id="slider-r" class="range-blue" type="range" min="0.25" max="2.80" step="0.05" value="1.00" />
+            <span class="scrubber-val" id="val-r">r = 1.00</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-x">Oscillation amplitude $X$</label>
+            <input id="slider-x" class="range-copper" type="range" min="0.25" max="1.80" step="0.05" value="1.00" />
+            <span class="scrubber-val" id="val-x">X = 1.00</span>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Viscous ($\Delta E = \pi c\omega X^2$)</div>
+            <div class="kpi-val c-blue" id="sec1-visc"></div>
+            <div class="kpi-sub">Loop height grows linearly with $r$</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Structural ($\Delta E = \pi \eta k X^2$)</div>
+            <div class="kpi-val c-teal" id="sec1-struct"></div>
+            <div class="kpi-sub">Independent of frequency $r$</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Coulomb ($\Delta E = 4 F_c X$)</div>
+            <div class="kpi-val c-crimson" id="sec1-coul"></div>
+            <div class="kpi-sub">Rectangle: linear in $X$, flat in $r$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-scaling">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Equivalent viscous damping</span>
+        <h2>2. Matching loop area defines $\zeta_{\mathrm{eq}}$, exposing Coulomb's $1/X$ amplitude dependence</h2>
+        <p>
+          Equating any mechanism's energy loss per cycle to a viscous dashpot yields
+          $c_{\mathrm{eq}} = \Delta E_d / (\pi \omega X^2)$. While viscous damping keeps $\zeta_{\mathrm{eq}}$
+          constant, Coulomb friction gives $\zeta_{\mathrm{eq}} = 2 F_c / (\pi k r X)$—huge damping at tiny amplitudes
+          and vanishing damping authority at large excursions.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Dissipation vs. frequency $\Delta E_d(r)$</strong>
+              <span>Viscous rises; structural &amp; Coulomb stay flat</span>
+            </div>
+            <div class="canvas-box h-scale">
+              <canvas id="damp-freq-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Equivalent damping ratio $\zeta_{\mathrm{eq}}(X)$</strong>
+              <span>Coulomb hyperbola $\propto 1/X$</span>
+            </div>
+            <div class="canvas-box h-scale">
+              <canvas id="damp-amp-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-stickslip">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Nonlinear dry-friction phase portrait</span>
+        <h2>3. Coulomb free decay traces shifted semicircles and stops dead inside the sticking zone $[-\delta, +\delta]$</h2>
+        <p>
+          In $\ddot{u} + u + \delta\operatorname{sgn}(\dot{u}) = 0$ ($\delta = F_c / k$), the effective equilibrium
+          shifts to $+\delta$ while moving left ($\dot{u} &lt; 0$) and to $-\delta$ while moving right ($\dot{u} &gt; 0$).
+          Each half-cycle trims the amplitude by exactly $2\delta$ ($4\delta$ per full cycle), producing a straight-line
+          envelope that halts permanently in finite time once a turning point lands inside $[-\delta, +\delta]$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="canvas-caption">
+              <strong>Phase plane $(u, \dot{u})$ &amp; sticking dead zone</strong>
+              <span>Amber band: $|u| \le \delta$ (spring cannot overcome friction)</span>
+            </div>
+            <div class="canvas-box h-stick">
+              <canvas id="damp-phase-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Time-domain linear ring-down vs. exponential viscous decay</strong>
+              <span>Halts at finite time $\tau_{\mathrm{stop}}$ with nonzero offset</span>
+            </div>
+            <div class="canvas-box h-stick">
+              <canvas id="damp-decay-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-u0">Initial release $u_0$</label>
+            <input id="slider-u0" class="range-teal" type="range" min="0.60" max="3.00" step="0.05" value="2.00" />
+            <span class="scrubber-val" id="val-u0"><i>u</i><sub>0</sub> = 2.00</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-delta">Dead-zone half-width $\delta = F_c/k$</label>
+            <input id="slider-delta" class="range-crimson" type="range" min="0.06" max="0.45" step="0.01" value="0.18" />
+            <span class="scrubber-val" id="val-delta">δ = 0.18</span>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-orange">
+            <div class="kpi-label">Linear amplitude drop per cycle</div>
+            <div class="kpi-val c-orange" id="sec3-drop"></div>
+            <div class="kpi-sub">Constant drop (not exponential!)</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Exact finite stop time</div>
+            <div class="kpi-val c-crimson" id="sec3-stop"></div>
+            <div class="kpi-sub">Viscous decay never stops in finite time</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Residual stuck offset</div>
+            <div class="kpi-val c-teal" id="sec3-offset"></div>
+            <div class="kpi-sub">Permanently locked inside $[-\delta, +\delta]$</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-frf">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Forced response comparison</span>
+        <h2>4. Pure Coulomb friction cannot bound resonance when $F_0 &gt; \tfrac{4}{\pi} F_c$</h2>
+        <p>
+          Because dry friction dissipates only $4 F_c X$ per cycle while harmonic drive injects up to $\pi F_0 X$ at
+          $r = 1$, whenever $F_c/F_0 &lt; \pi/4 \approx 0.785$ the harmonic-balance FRF
+          $M_{\mathrm{Coul}}(r) = \sqrt{1 - (4F_c/(\pi F_0))^2}/|1 - r^2|$ diverges at resonance—unlike viscous and
+          structural damping, which grow quadratically ($X^2$) and always cap the peak.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="canvas-box h-frf">
+          <canvas id="damp-frf-canvas"></canvas>
+        </div>
+
+        <div class="scrubber-bar">
+          <label for="slider-fc">Dry-friction force ratio $F_c / F_0$</label>
+          <input id="slider-fc" class="range-crimson" type="range" min="0.05" max="0.76" step="0.01" value="0.24" />
+          <span class="scrubber-val" id="val-fc"><i>F</i><sub>c</sub>/<i>F</i><sub>0</sub> = 0.24</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-table">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Model comparison</span>
+        <h2>5. Summary of damping laws, loop shapes, and free-decay signatures</h2>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="margin-top: 0;">
+          <table class="nld-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Force law</th>
+                <th>Hysteresis shape</th>
+                <th>$\Delta E_d$ per cycle</th>
+                <th>Equivalent $\zeta_{\mathrm{eq}}$</th>
+                <th>Free-decay signature</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Viscous</strong></td>
+                <td>$c\dot{x}$</td>
+                <td>Ellipse (height $\propto \omega$)</td>
+                <td>$\pi c\omega X^2$</td>
+                <td>$\zeta$ (constant)</td>
+                <td>Exponential envelope $\mathrm{e}^{-\zeta\omega_{\mathrm{n}} t}$</td>
+              </tr>
+              <tr>
+                <td><strong>Structural (hysteretic)</strong></td>
+                <td>$\frac{\eta k}{\omega}\dot{x}$ ($k(1+\mathrm{i}\eta)$)</td>
+                <td>Ellipse (fixed in $\omega$)</td>
+                <td>$\pi \eta k X^2$</td>
+                <td>$\eta / (2r)$</td>
+                <td>Frequency-domain model; $\eta = 2\zeta$ at resonance</td>
+              </tr>
+              <tr>
+                <td><strong>Coulomb dry friction</strong></td>
+                <td>$\mu N \operatorname{sgn}(\dot{x})$</td>
+                <td>Rectangle (tilted parallelogram)</td>
+                <td>$4 F_c X$</td>
+                <td>$2 F_c / (\pi k r X)$</td>
+                <td>Linear decay ($-4\delta$/cycle), finite-time stick stop</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 6 · Workflow &amp; code</span>
+        <h2>6. Equivalent-damping analysis workflow and verification code</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin: 0 0 12px; font-size: 16px;">Modeling non-viscous damping (Inman 2.7)</h3>
+          <ol class="summary-steps">
+            <li>
+              <span class="step-badge">1</span>
+              <div><strong>Inspect the ring-down envelope.</strong> Exponential decay $\Rightarrow$ viscous/structural; straight-line envelope stopping at an offset $\Rightarrow$ Coulomb friction.</div>
+            </li>
+            <li>
+              <span class="step-badge">2</span>
+              <div><strong>Compute cycle energy $\Delta E_d = \oint f_d\,\mathrm{d}x$.</strong> Integrate over one assumed harmonic cycle $x = X\sin\omega t$.</div>
+            </li>
+            <li>
+              <span class="step-badge">3</span>
+              <div><strong>Extract $c_{\mathrm{eq}} = \Delta E_d / (\pi\omega X^2)$.</strong> Note whether $c_{\mathrm{eq}}$ depends on $\omega$, $X$, or both.</div>
+            </li>
+            <li>
+              <span class="step-badge">4</span>
+              <div><strong>Check resonance boundedness.</strong> For pure dry friction, verify whether $F_c / F_0 &lt; \pi/4$; if so, include residual viscous/structural damping.</div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <h3 style="margin: 0; font-size: 16px;">Verify damping laws in code</h3>
+            <div class="code-tabs" id="code-lang-tabs">
+              <button class="btn btn-sm is-active" data-lang="matlab" type="button">MATLAB</button>
+              <button class="btn btn-sm" data-lang="python" type="button">Python (NumPy)</button>
+              <button class="btn btn-sm" id="btn-copy-code" type="button">Copy</button>
+            </div>
+          </div>
+          <pre class="code-block" id="live-code-block"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-cite">
+      <div class="card cite-card">
+        <div class="cite-head">
+          <div>
+            <div class="copper-bar" style="width: 32px; margin-bottom: 6px;"></div>
+            <span class="section-tag" style="margin-bottom: 2px;">Attribution &amp; citation</span>
+            <h3 style="margin: 2px 0 0; font-size: 16.5px;">How to cite this tutorial</h3>
+          </div>
+          <div class="code-tabs" id="cite-format-tabs">
+            <button class="btn btn-sm is-active" data-cite="apa" type="button">APA</button>
+            <button class="btn btn-sm" data-cite="ieee" type="button">IEEE</button>
+            <button class="btn btn-sm" data-cite="bibtex" type="button">BibTeX</button>
+            <button class="btn btn-sm btn-primary" id="btn-copy-cite" type="button">Copy citation</button>
+          </div>
+        </div>
+        <pre class="cite-box" id="cite-text-block"></pre>
+        <p class="cite-meta">
+          Author: <strong>David Chelidze</strong> · Nonlinear Dynamics Laboratory, Department of Mechanical, Industrial
+          and Systems Engineering, University of Rhode Island.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; <span id="copyright-year">2026</span>
+        <strong><a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a></strong>,
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island. All rights reserved.
+      </span>
+      <span>Interactive Vibrations &amp; Dynamics Tutorial · Mathematics typeset with KaTeX.</span>
+    </div>
+  </footer>
+
+  <script defer src="js/math-damping.js"></script>
+  <script defer src="js/viz-loops.js"></script>
+  <script defer src="js/viz-scaling.js"></script>
+  <script defer src="js/viz-stickslip.js"></script>
+  <script defer src="js/viz-frf.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>

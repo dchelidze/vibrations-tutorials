@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Excitation, Rotating Unbalance &amp; Seismic Sensors — Nonlinear Dynamics Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../" title="Back to all Vibrations &amp; Dynamics tutorials">
+        <div class="brand-mark">$T_d$</div>
+        <div>
+          <span class="brand-title">Base excitation &amp; seismic sensors</span>
+          <span class="brand-sub">Nonlinear Dynamics Laboratory · URI · All tutorials</span>
+        </div>
+      </a>
+
+      <nav class="chapter-nav" aria-label="Tutorial sections">
+        <a href="#sec-triangle">1. Triangle $X=Y+Z$</a>
+        <a href="#sec-curves">2. Transmissibility</a>
+        <a href="#sec-sensors">3. Seismic sensors</a>
+        <a href="#sec-unbalance">4. Unbalance</a>
+        <a href="#sec-summary">5. Workflow</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button id="btn-theme" class="btn-nav" type="button" title="Toggle dark and light presentation theme">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+          </svg>
+          <span id="btn-theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-band" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">Nonlinear Dynamics Laboratory · Vibrations &amp; Dynamics Coursework · Module 09</div>
+      <div class="copper-bar"></div>
+      <h1>Base excitation, rotating unbalance, and seismic sensor regimes</h1>
+      <p class="hero-lead">
+        Vibration isolation, seismic transducers, and rotating-unbalance machines share one complex triangle:
+        <span class="c-blue-hero">$X = Y + Z$</span>, or $H_{\mathrm{abs}}(\mathrm{i}r) = 1 + H_{\mathrm{rel}}(\mathrm{i}r)$.
+        Sweep $r = \omega / \omega_{\mathrm{n}}$ and $\zeta$ to watch one SDOF oscillator act as a stiff
+        <span class="c-teal-hero">accelerometer ($r \ll 1$)</span>, cross the invariant
+        <span class="c-orange-hero">$r = \sqrt{2}$ isolation point</span>, become a soft
+        <span class="c-crimson-hero">vibrometer ($r \gg 1$)</span>, and flip $180^\circ$ to stabilize a
+        supercritical rotor's center of mass.
+      </p>
+
+      <div class="system-bar">
+        <div class="pill-group" id="preset-selector" role="tablist" aria-label="Select operating regime preset">
+          <button class="pill active" data-preset="crossover" type="button">Crossover ($r = \sqrt{2}$)</button>
+          <button class="pill" data-preset="accelerometer" type="button">Accelerometer ($r=0.40, \zeta=0.70$)</button>
+          <button class="pill" data-preset="vibrometer" type="button">Vibrometer ($r=2.80, \zeta=0.70$)</button>
+          <button class="pill" data-preset="unbalance_super" type="button">Supercritical rotor ($r=2.40$)</button>
+        </div>
+        <p class="system-desc-inline" id="preset-desc"></p>
+      </div>
+    </div>
+  </section>
+
+  <main class="page-wrap">
+
+    <section class="lesson-section" id="sec-triangle">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 1 · Kinematic phasor closure</span>
+        <h2>1. The complex displacement triangle $X = Y + Z$ governs every base-excited regime</h2>
+        <p>
+          When the base oscillates as $y(t) = Y\cos(\omega t)$, the spring and damper feel only the relative stroke
+          $z(t) = x(t) - y(t)$, governed by $m\ddot{z} + c\dot{z} + kz = -m\ddot{y} = m\omega^2 Y\cos(\omega t)$.
+          Normalizing by $Y = 1$, the absolute phasor $X = H_{\mathrm{abs}}(\mathrm{i}r)$ closes the triangle
+          $X = 1 + Z$, landing inside the dashed teal unit circle whenever $r > \sqrt{2}$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-triangle"></div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div>
+            <div class="canvas-caption">
+              <strong>Animated base-excited oscillator</strong>
+              <span>Relative stroke $z = x - y$</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="rig-canvas"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Complex displacement triangle ($Y = 1$)</strong>
+              <span>Dashed teal circle: $|X|/Y = 1$ isolation boundary</span>
+            </div>
+            <div class="canvas-box h-tri">
+              <canvas id="tri-canvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 12px;">
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-r">Frequency ratio $r = \omega / \omega_{\mathrm{n}}$</label>
+            <input id="slider-r" class="range-copper" type="range" min="0.05" max="4.00" step="0.01" value="1.41" />
+            <span class="scrubber-val" id="val-r">r = 1.41</span>
+          </div>
+          <div class="scrubber-bar" style="margin-top: 0;">
+            <label for="slider-zeta">Damping ratio $\zeta$</label>
+            <input id="slider-zeta" class="range-teal" type="range" min="0.05" max="1.20" step="0.01" value="0.20" />
+            <span class="scrubber-val" id="val-zeta">ζ = 0.20</span>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="controls-group">
+            <button id="btn-play" class="btn btn-primary btn-sm" type="button">Pause motion</button>
+          </div>
+          <div class="controls-group" style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">
+            <span>Relative phase $\phi_{\mathrm{rel}} =$ <strong id="stat-phrel">-150.5°</strong></span>
+            <span>·</span>
+            <span>Unbalance peak $r_{\mathrm{p}} =$ <strong id="stat-rpeak">1.04</strong></span>
+          </div>
+        </div>
+
+        <div class="kpi-grid-3">
+          <div class="kpi kpi-blue">
+            <div class="kpi-label">Absolute transmissibility $|X|/Y$</div>
+            <div class="kpi-val c-blue" id="stat-td">1.000</div>
+            <div class="kpi-sub">Isolation requires $T_{\mathrm{d}} &lt; 1$ ($r &gt; \sqrt{2}$)</div>
+          </div>
+          <div class="kpi kpi-crimson">
+            <div class="kpi-label">Relative / Unbalance $|Z|/Y = MX/(m_0 e)$</div>
+            <div class="kpi-val c-crimson" id="stat-rrel">1.732</div>
+            <div class="kpi-sub">Approaches $1$ as $r \to \infty$ (vibrometer)</div>
+          </div>
+          <div class="kpi kpi-teal">
+            <div class="kpi-label">Accelerometer gain $\omega_{\mathrm{n}}^2 |Z|/|\ddot{Y}|$</div>
+            <div class="kpi-val c-teal" id="stat-accel">0.866</div>
+            <div class="kpi-sub">Flat near $1$ for $r \ll 1$ ($\zeta \approx 0.70$)</div>
+          </div>
+        </div>
+
+        <div id="regime-insight" class="callout"></div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-curves">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 2 · Dual frequency-response curves</span>
+        <h2>2. Invariant $r = \sqrt{2}$ transmissibility crossover versus the relative / unbalance curve</h2>
+        <p>
+          Every absolute transmissibility curve $T_{\mathrm{d}}(r,\zeta) = |X|/Y$ passes through the exact fixed point
+          $(\sqrt{2}, 1)$: adding damping suppresses resonance below $\sqrt{2}$ but degrades high-frequency isolation
+          above $\sqrt{2}$. Meanwhile, the relative curve $|Z|/Y$ is algebraically identical to the dimensionless
+          rotating-unbalance response $MX/(m_0 e)$ and peaks slightly above unity at $r_{\mathrm{p}} = 1/\sqrt{1-2\zeta^2}$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-trans"></div>
+        <div class="grid-2" style="margin-top: 12px;">
+          <div>
+            <div class="canvas-caption">
+              <strong>Absolute displacement transmissibility $|X|/Y$</strong>
+              <span>Invariant crossover at $(r, T_{\mathrm{d}}) = (\sqrt{2}, 1)$</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="canvas-trans"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Relative motion $|Z|/Y \equiv MX/(m_0 e)$</strong>
+              <span>Same curve for seismic stroke and rotating unbalance</span>
+            </div>
+            <div class="canvas-box h-curve">
+              <canvas id="canvas-rel"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-sensors">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 3 · Seismic instrument design</span>
+        <h2>3. One transducer, two regimes: Butterworth damping maximizes $\pm 5\%$ bandwidth</h2>
+        <p>
+          A seismic sensor reads the relative spring deflection $z(t)$. Making the suspension stiff ($r \ll 1$) yields
+          an <strong>accelerometer</strong> ($z \approx -\ddot{y}/\omega_{\mathrm{n}}^2$); making it soft ($r \gg 1$)
+          yields a <strong>vibrometer</strong> ($z \approx -y$). Because $|H_{\mathrm{rel}}(r)| \equiv |H_{\mathrm{acc}}(1/r)|$,
+          near-Butterworth damping $\zeta = 0.70$ maximizes the $\pm 5\%$ flat band for both instruments simultaneously
+          ($r \le 0.59$ and $r \ge 1.69$, satisfying $r_{\max}\,r_{\min} = 1$).
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-sensors"></div>
+        <div class="grid-2" style="margin-top: 12px;">
+          <div>
+            <div class="canvas-caption">
+              <strong>Accelerometer regime ($r \ll 1$)</strong>
+              <span>Active $\pm 5\%$ band: <strong id="stat-acccut">r ≤ 0.23</strong></span>
+            </div>
+            <div class="canvas-box h-sens">
+              <canvas id="canvas-accel"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-caption">
+              <strong>Vibrometer regime ($r \gg 1$)</strong>
+              <span>Active $\pm 5\%$ band: <strong id="stat-vibcut">r ≥ 4.50</strong></span>
+            </div>
+            <div class="canvas-box h-sens">
+              <canvas id="canvas-vibro"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-unbalance">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 4 · Rotating unbalance &amp; supercritical phase flip</span>
+        <h2>4. Above resonance, the housing flips $180^\circ$ so the combined center of mass stands still</h2>
+        <p>
+          A machine of total mass $M$ carrying an eccentric rotor mass $m_0$ at radius $e$ satisfies
+          $M\ddot{x} + c\dot{x} + kx = m_0 e \omega^2\cos(\omega t)$, giving $MX/(m_0 e) = H_{\mathrm{rel}}(\mathrm{i}r)$.
+          Because the combined center of mass lies at $x_{\mathrm{CM}}(t) = x(t) + (m_0/M)e\cos(\omega t)$, its
+          normalized phasor satisfies the exact same triangle identity:
+          $MX_{\mathrm{CM}}/(m_0 e) = 1 + H_{\mathrm{rel}}(\mathrm{i}r) = H_{\mathrm{abs}}(\mathrm{i}r) \to 0$ as
+          $r \to \infty$.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="eq-box" id="eq-unbalance"></div>
+        <div class="canvas-caption" style="margin-top: 12px;">
+          <strong>Live rotating-unbalance machine &amp; synchronous waveforms</strong>
+          <span>Compare eccentric offset (orange), housing $Mx/(m_0 e)$ (crimson), and center of mass (teal)</span>
+        </div>
+        <div class="canvas-box h-unbal">
+          <canvas id="canvas-unbalance"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section" id="sec-summary">
+      <div class="section-header">
+        <div class="copper-bar"></div>
+        <span class="section-tag">Part 5 · Reproducible MATLAB verification</span>
+        <h2>5. Verify the triangle identity and instrument cutoffs in MATLAB</h2>
+      </div>
+
+      <div class="card">
+        <div class="controls-row" style="margin-top: 0; margin-bottom: 10px;">
+          <span style="font-family: var(--font-sans); font-size: 13px; font-weight: 600;">
+            MATLAB · Base Excitation, Unbalance &amp; Seismic Sensor Script
+          </span>
+          <button id="btn-copy-code" class="btn btn-sm" type="button">Copy MATLAB</button>
+        </div>
+        <pre class="code-block" id="code-snippet"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-band">
+    <div class="footer-inner">
+      <span>
+        &copy; 2026 <a href="https://web.uri.edu/nld/meet/chelidze/" target="_blank" rel="noopener">David Chelidze</a> ·
+        <a href="https://www.uri.edu/nld/" target="_blank" rel="noopener">Nonlinear Dynamics Laboratory</a>,
+        University of Rhode Island · MCE 464 Vibrations
+      </span>
+      <span>Module 09 · Base Excitation, Rotating Unbalance &amp; Seismic Sensors</span>
+    </div>
+  </footer>
+
+  <script src="js/math-sensors.js"></script>
+  <script src="js/viz-triangle.js"></script>
+  <script src="js/viz-curves.js"></script>
+  <script src="js/viz-sensors.js"></script>
+  <script src="js/viz-unbalance.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
