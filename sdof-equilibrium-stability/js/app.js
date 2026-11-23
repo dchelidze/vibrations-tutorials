@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 03:
+ * Central reactive controller for Module 02:
  * Equilibrium Stability, Eigenvalues, and Phase Portraits of 1-DOF Systems.
  * Coordinates KaTeX typesetting, (tau, Delta) state synchronization across all five
  * interactive visualizations, classification table, MATLAB/Python verification scripts,

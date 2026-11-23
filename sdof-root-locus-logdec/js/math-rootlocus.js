@@ -1,6 +1,6 @@
 /**
  * math-rootlocus.js
- * Exact analytical mathematics engine for Module 11:
+ * Exact analytical mathematics engine for Module 01:
  * Viscous Free-Response Root Locus (s-Plane Geometry) and Logarithmic Decrement Identification.
  *
  * Dimensionless free SDOF oscillator (omega_n > 0):

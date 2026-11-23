@@ -1,6 +1,6 @@
 /**
  * viz-force-poly.js
- * Section 1 centerpiece visualization for Module 07 (sdof-harmonic-phasors):
+ * Section 1 centerpiece visualization for Module 03 (sdof-harmonic-phasors):
  * - Left canvas: Live animated 1-DOF forced mass-spring-damper rig with auto-sized mass block
  *                and synchronized drive F0(t) vs. displacement x(t) mini-waveform showing phase lag phi.
  * - Right canvas: Complex force-balance polygon (optionally rotating at w or locked to X-axis):

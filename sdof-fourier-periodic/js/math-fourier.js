@@ -1,6 +1,6 @@
 /**
  * math-fourier.js
- * Exact analytical mathematics engine for Module 10:
+ * Exact analytical mathematics engine for Module 06:
  * Periodic Forcing, Fourier Epicycles, Harmonic Filtering, and Subharmonic Resonance.
  *
  * Dimensionless SDOF oscillator (k = 1, w_n = 1):

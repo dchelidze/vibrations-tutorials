@@ -1,6 +1,6 @@
 /**
  * viz-unbalance.js
- * Section 4 visualization for Module 09 (sdof-base-sensors):
+ * Section 4 visualization for Module 04 (sdof-base-sensors):
  * Animated rotating-unbalance machine M with eccentric mass m_0 at radius e spinning at rate w:
  * - Left panel: Physical housing on spring-damper mount with spinning rotor, heavy spot, and
  *               combined center-of-mass indicator showing the 180-deg phase flip across r = 1.

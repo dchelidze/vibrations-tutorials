@@ -1,6 +1,6 @@
 /**
  * viz-curves.js
- * Section 2 visualization for Module 09 (sdof-base-sensors):
+ * Section 2 visualization for Module 04 (sdof-base-sensors):
  * - Left canvas: Absolute displacement transmissibility |X|/Y with invariant (sqrt(2), 1) crossover.
  * - Right canvas: Relative displacement |Z|/Y === M X / (m_0 e) (rotating unbalance!)
  *                 approaching unity as r -> infinity.

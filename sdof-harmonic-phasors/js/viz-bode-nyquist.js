@@ -1,6 +1,6 @@
 /**
  * viz-bode-nyquist.js
- * Section 2 visualization for Module 07 (sdof-harmonic-phasors):
+ * Section 2 visualization for Module 03 (sdof-harmonic-phasors):
  * - Left canvas: Interactive Bode magnitude M(r, zeta) and phase lag phi(r, zeta)
  *                across a damping family with draggable frequency ratio r cursor.
  * - Right canvas: Complex receptance Nyquist locus k H(i w) = 1 / ((1 - r^2) + i 2 zeta r),

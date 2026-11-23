@@ -1,6 +1,6 @@
 /**
  * viz-damping.js
- * Section 5 visualization for Module 04 (2dof-modal-response):
+ * Section 5 visualization for Module 09 (2dof-modal-response):
  * - Left canvas: Geometric comparison in mass-normalized q-space of the stiffness ellipse
  *                (q^T Ktilde q = const, aligned with normal modes v1, v2) and the Rayleigh
  *                dissipation ellipse (dq^T Cq dq = const). Under proportional damping

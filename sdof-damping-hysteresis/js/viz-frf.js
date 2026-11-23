@@ -1,6 +1,6 @@
 /**
  * viz-frf.js
- * Section 4 visualization for Module 08 (sdof-damping-hysteresis):
+ * Section 4 visualization for Module 05 (sdof-damping-hysteresis):
  * Compares forced frequency response |X| / (F0/k) across Viscous, Structural (k(1+i eta)),
  * and Harmonic-Balance Coulomb dry friction (demonstrating unbounded resonance whenever Fc/F0 < pi/4!).
  */

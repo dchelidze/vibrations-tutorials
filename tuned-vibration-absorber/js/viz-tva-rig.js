@@ -1,6 +1,6 @@
 /**
  * viz-tva-rig.js
- * Section 1 visualization for Module 05 (tuned-vibration-absorber):
+ * Section 1 visualization for Module 10 (tuned-vibration-absorber):
  * - Left canvas: Live animated primary mass m1 + absorber mass ma driven harmonically
  *                by F0 cos(w t), showing live opposing reaction force arrow F_{a->1}(t) vs F0(t).
  *                Uses typographic canvas subscripts and auto-sized mass boxes so text always fits cleanly.

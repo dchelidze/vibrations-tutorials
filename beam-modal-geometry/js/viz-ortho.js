@@ -1,6 +1,6 @@
 /**
  * viz-ortho.js
- * Section 2 visualization for Module 06 (beam-modal-geometry):
+ * Section 2 visualization for Module 11 (beam-modal-geometry):
  * Function-space L^2 orthogonality as cancelling positive/negative area lobes!
  * - Left canvas: Overlay of phi_i(xi) (teal) and phi_j(xi) (crimson) on xi in [0, 1].
  * - Right canvas: Product phi_i(xi) * phi_j(xi) with positive lobes shaded teal and

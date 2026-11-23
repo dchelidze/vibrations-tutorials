@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 05:
+ * Central reactive controller for Module 10:
  * Tuned Vibration Absorbers, Den Hartog Fixed Points, and Passive Isolation.
  */
 (function () {

@@ -1,6 +1,6 @@
 /**
  * viz-logdec.js
- * Section 2 & 3 visualizations for Module 11 (sdof-root-locus-logdec):
+ * Section 2 & 3 visualizations for Module 01 (sdof-root-locus-logdec):
  * - Section 2 left canvas: Underdamped ring-down with numbered peaks x_0, x_1, ..., x_k (with optional noise).
  * - Section 2 right canvas: Semilog linear regression ln(x_k) vs. cycle k comparing exact slope -delta,
  *                           OLS fitted line, and single-cycle (k=0 -> k=1) secant.

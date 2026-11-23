@@ -1,6 +1,6 @@
 /**
  * viz-orthogonality.js
- * Section 1 visualization for Module 04 (2dof-modal-response):
+ * Section 1 visualization for Module 09 (2dof-modal-response):
  * Side-by-side geometric comparison of:
  *   Left  canvas: Physical (x1, x2) plane with kinetic-energy ellipse x^T M x = 1,
  *                 skewed eigenvectors u1, u2, conjugate-diameter tangent line,

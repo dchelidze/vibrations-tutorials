@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 07:
+ * Central reactive controller for Module 03:
  * Harmonic Forcing, Rotating Force-Polygon Geometry, Beating, and Phase Resonance.
  */
 (function () {

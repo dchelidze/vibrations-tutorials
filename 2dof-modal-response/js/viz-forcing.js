@@ -1,6 +1,6 @@
 /**
  * viz-forcing.js
- * Section 3 visualization for Module 04 (2dof-modal-response):
+ * Section 3 visualization for Module 09 (2dof-modal-response):
  * - Left canvas: Interactive physical forcing plane (F1, F2) with draggable harmonic force
  *                amplitude vector f0 = [F1, F2]^T, mode shapes u1, u2, zero-excitation lines
  *                u1^T f0 = 0 and u2^T f0 = 0, and modal generalized force projections Q1, Q2.

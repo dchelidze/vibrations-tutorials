@@ -1,6 +1,6 @@
 /**
  * math-harmonic.js
- * Exact analytical mathematics engine for Module 07:
+ * Exact analytical mathematics engine for Module 03:
  * Harmonic Forcing, Rotating Force-Polygon Geometry, Beating, and Phase Resonance.
  *
  * Dimensionless SDOF equation:

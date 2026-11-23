@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 08:
+ * Central reactive controller for Module 05:
  * Damping Mechanisms in the Force-Displacement Plane (Viscous, Coulomb, Structural)
  * and Coulomb Stick-Slip Free Decay.
  */

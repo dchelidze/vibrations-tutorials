@@ -1,6 +1,6 @@
 /**
  * viz-stickslip.js
- * Section 3 visualization for Module 08 (sdof-damping-hysteresis):
+ * Section 3 visualization for Module 05 (sdof-damping-hysteresis):
  * Exact piecewise-analytical Coulomb free-decay phase portrait & linear ring-down!
  * - Left canvas: Phase plane (u, u') showing exact alternating semicircular arcs centered
  *                at +delta (lower half, v < 0) and -delta (upper half, v > 0), terminating

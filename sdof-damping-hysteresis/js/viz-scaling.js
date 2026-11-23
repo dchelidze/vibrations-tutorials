@@ -1,6 +1,6 @@
 /**
  * viz-scaling.js
- * Section 2 visualization for Module 08 (sdof-damping-hysteresis):
+ * Section 2 visualization for Module 05 (sdof-damping-hysteresis):
  * - Left canvas: Energy dissipated per cycle Delta E_d vs. frequency ratio r = w / w_n
  *                (viscous grows linearly with r; Coulomb & structural remain strictly flat!).
  * - Right canvas: Equivalent viscous damping ratio zeta_eq vs. amplitude X

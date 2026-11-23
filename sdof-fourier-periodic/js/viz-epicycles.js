@@ -1,6 +1,6 @@
 /**
  * viz-epicycles.js
- * Section 1 visualization for Module 10 (sdof-fourier-periodic):
+ * Section 1 visualization for Module 06 (sdof-fourier-periodic):
  * - Left canvas: Live rotating Fourier epicycle chain for the filtered SDOF output x_ss(t),
  *                projecting horizontally onto the live waveform cursor.
  * - Right canvas: Two full drive cycles comparing exact periodic forcing f(t) (dashed gray),

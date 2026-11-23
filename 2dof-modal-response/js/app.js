@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 04:
+ * Central reactive controller for Module 09:
  * Modal Decoupling, Forced 2-DOF Response, and Antiresonance.
  */
 (function () {

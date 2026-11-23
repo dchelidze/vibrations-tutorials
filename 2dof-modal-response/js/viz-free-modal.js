@@ -1,6 +1,6 @@
 /**
  * viz-free-modal.js
- * Section 2 visualization for Module 04 (2dof-modal-response):
+ * Section 2 visualization for Module 09 (2dof-modal-response):
  * - Top canvas: Live animated coupled 2-DOF mass-spring-damper chain (left)
  *               side by side with the two decoupled 1-DOF modal oscillators r1(t), r2(t) (right).
  * - Bottom canvas: Synchronized time waveforms showing modal coordinates r1(t), r2(t)

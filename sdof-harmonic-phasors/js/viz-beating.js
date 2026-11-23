@@ -1,6 +1,6 @@
 /**
  * viz-beating.js
- * Section 3 visualization for Module 07 (sdof-harmonic-phasors):
+ * Section 3 visualization for Module 03 (sdof-harmonic-phasors):
  * Undamped near-resonance beating and secular resonance growth (zeta = 0, from rest):
  * - Left canvas: Two equal-length rotating phasors (angular speeds r and 1) drifting in and
  *                out of phase, pulsing their difference vector from 0 to 2A at beat frequency |1 - r|.

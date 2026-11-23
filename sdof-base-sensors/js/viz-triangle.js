@@ -1,6 +1,6 @@
 /**
  * viz-triangle.js
- * Section 1 visualization for Module 09 (sdof-base-sensors):
+ * Section 1 visualization for Module 04 (sdof-base-sensors):
  * - Left canvas: Live animated moving-base oscillator showing base motion y(t),
  *                auto-sized seismic mass m at absolute position x(t), and relative stroke z = x - y.
  * - Right canvas: Exact complex phasor triangle X = Y + Z (normalized by Y = 1)

@@ -1,6 +1,6 @@
 /**
  * viz-locus.js
- * Section 1 visualization for Module 11 (sdof-root-locus-logdec):
+ * Section 1 visualization for Module 01 (sdof-root-locus-logdec):
  * - Left canvas: Complex s-plane root locus showing the semicircular arc of radius w_n
  *                for 0 <= zeta <= 1, polar damping angle cos(theta) = zeta, collision at -w_n,
  *                and fast/slow split along the negative real axis for zeta > 1.

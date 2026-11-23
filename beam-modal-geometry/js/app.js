@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 06:
+ * Central reactive controller for Module 11:
  * Continuous Beams as Infinite-DOF Modal Geometry.
  */
 (function () {

@@ -1,6 +1,6 @@
 /**
  * viz-sensors.js
- * Section 3 visualization for Module 09 (sdof-base-sensors):
+ * Section 3 visualization for Module 04 (sdof-base-sensors):
  * - Left canvas: Accelerometer calibration gain w_n^2 |Z| / |Y''| = 1 / sqrt((1 - r^2)^2 + (2 zeta r)^2)
  *                with shaded +/-5% flat-response band and Butterworth optimal zeta = 0.70.
  * - Right canvas: Vibrometer calibration gain |Z| / Y = r^2 / sqrt((1 - r^2)^2 + (2 zeta r)^2)

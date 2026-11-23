@@ -1,6 +1,6 @@
 /**
  * app.js
- * Main controller for Module 10 (sdof-fourier-periodic):
+ * Main controller for Module 06 (sdof-fourier-periodic):
  * Periodic Forcing, Fourier Epicycles, Harmonic Filtering, and Subharmonic Resonance.
  */
 (function () {
@@ -142,7 +142,7 @@
     const el = document.getElementById('code-snippet');
     if (!el) return;
     el.textContent =
-`% Module 10: Fourier-Series Steady-State SDOF Response (Inman Ch. 3)
+`% Module 06: Fourier-Series Steady-State SDOF Response (Inman Ch. 3)
 r0 = ${M.fmt(state.r0, 4)};   zeta = ${M.fmt(state.zeta, 3)};   N = ${state.N};
 theta = linspace(0, 4*pi, 800);
 n = (1:N).';

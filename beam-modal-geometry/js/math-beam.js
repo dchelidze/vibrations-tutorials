@@ -1,6 +1,6 @@
 /**
  * math-beam.js
- * Exact analytical & cancellation-free Euler-Bernoulli beam eigenproblem engine for Module 06:
+ * Exact analytical & cancellation-free Euler-Bernoulli beam eigenproblem engine for Module 11:
  * Continuous Beams as Infinite-DOF Modal Geometry.
  *
  * Dimensionless spatial coordinate: xi = x / L in [0, 1]

@@ -1,6 +1,6 @@
 /**
  * viz-antiresonance.js
- * Section 4 visualization for Module 04 (2dof-modal-response):
+ * Section 4 visualization for Module 09 (2dof-modal-response):
  * - Left canvas: Interactive Bode magnitude (log) and phase (-360..0 deg) plot for
  *                selected receptance FRF entry H11, H21 (=H12), or H22, with draggable
  *                vertical frequency cursor w and marked w1, w2, and antiresonance wa.

@@ -1,6 +1,6 @@
 /**
  * math-tva.js
- * Exact analytical mathematics engine for Module 05:
+ * Exact analytical mathematics engine for Module 10:
  * Tuned Vibration Absorbers (TVA / Den Hartog) & Passive Vibration Isolation.
  *
  * Dimensionless TVA parameters:

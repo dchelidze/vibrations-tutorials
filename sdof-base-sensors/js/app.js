@@ -1,6 +1,6 @@
 /**
  * app.js
- * Main controller for Module 09:
+ * Main controller for Module 04:
  * Base Excitation, Rotating Unbalance, and Seismic Sensor Regimes.
  */
 (function () {
@@ -142,7 +142,7 @@
     const rStr = M.fmt(state.r, 3);
     const zStr = M.fmt(state.zeta, 3);
     el.textContent =
-`% Module 09: Base Excitation, Rotating Unbalance, and Seismic Sensors (Inman Ch. 2)
+`% Module 04: Base Excitation, Rotating Unbalance, and Seismic Sensors (Inman Ch. 2)
 zeta = ${zStr};
 r = linspace(0, 4, 800);
 den = (1 - r.^2) + 1i*(2*zeta*r);

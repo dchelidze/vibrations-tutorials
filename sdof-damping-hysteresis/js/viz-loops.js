@@ -1,6 +1,6 @@
 /**
  * viz-loops.js
- * Section 1 visualization for Module 08 (sdof-damping-hysteresis):
+ * Section 1 visualization for Module 05 (sdof-damping-hysteresis):
  * - Left canvas: Pure damping hysteresis loops in the (x, f_d) plane:
  *                Viscous ellipse (blue, scales with r), Structural ellipse (teal, flat in r),
  *                and Coulomb rectangle (crimson, flat in r, height = +/- Fc).

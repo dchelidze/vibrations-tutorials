@@ -1,6 +1,6 @@
 /**
  * viz-splitting.js
- * Section 3 visualization for Module 05 (tuned-vibration-absorber):
+ * Section 3 visualization for Module 10 (tuned-vibration-absorber):
  * - Left canvas: Bifurcation-style plot of split natural frequencies r1(mu), r2(mu),
  *                optimal fixed points rP(mu), rQ(mu), and optimal peak bound M_opt(mu) vs. mass ratio mu.
  * - Right canvas: Absorber relative stroke |Xa - X1| / Xst vs. driving frequency ratio r,

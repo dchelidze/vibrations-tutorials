@@ -1,6 +1,6 @@
 /**
  * viz-bridge.js
- * Section 4 visualization for Module 06 (beam-modal-geometry):
+ * Section 4 visualization for Module 11 (beam-modal-geometry):
  * Compares the quadratic Euler-Bernoulli frequency progression w_n = (beta_n L)^2 w_0
  * across all five classical boundary conditions (CF, SS, CP, CC, FF) against the
  * linear harmonic progression (w_n / w_1 = n) of a taut string / axial bar.

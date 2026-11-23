@@ -1,6 +1,6 @@
 /**
  * viz-roots.js
- * Section 1 visualization for Module 06 (beam-modal-geometry):
+ * Section 1 visualization for Module 11 (beam-modal-geometry):
  * - Left canvas: Graphical root-finding of the transcendental characteristic equation
  *                over beta*L in [0, 18.5], with clickable root markers for Modes 1..5.
  * - Right canvas: Live animated vibrating Euler-Bernoulli mode shape phi_n(x/L) cos(w_n t),

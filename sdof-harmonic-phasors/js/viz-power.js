@@ -1,6 +1,6 @@
 /**
  * viz-power.js
- * Section 4 visualization for Module 07 (sdof-harmonic-phasors):
+ * Section 4 visualization for Module 03 (sdof-harmonic-phasors):
  * - Left canvas: Normalized average input power P_bar(r) = 2 zeta r^2 / ((1-r^2)^2 + (2 zeta r)^2)
  *                with shaded exact half-power band [r1, r2] where r2 - r1 === 2 zeta identically!
  * - Right canvas: Force-velocity Lissajous / work loop (x'(t) vs F0(t)) showing why input power

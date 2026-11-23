@@ -1,6 +1,6 @@
 /**
  * math-modal2dof.js
- * Exact analytical & numerical mathematics engine for Module 04:
+ * Exact analytical & numerical mathematics engine for Module 09:
  * Modal Decoupling, Forced 2-DOF Response, and Antiresonance.
  *
  * Physical system:

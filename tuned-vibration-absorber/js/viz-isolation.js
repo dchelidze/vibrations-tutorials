@@ -1,6 +1,6 @@
 /**
  * viz-isolation.js
- * Section 4 visualization for Module 05 (tuned-vibration-absorber):
+ * Section 4 visualization for Module 10 (tuned-vibration-absorber):
  * Passive Vibration Isolation & the Invariant r = sqrt(2) Crossover:
  * - Left canvas: Transmissibility T(r, zeta) for a family of damping ratios plus
  *                active user zeta, highlighting the exact crossover (sqrt(2), 1),

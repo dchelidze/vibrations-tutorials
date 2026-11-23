@@ -1,6 +1,6 @@
 /**
  * math-damping.js
- * Exact analytical mathematics engine for Module 08:
+ * Exact analytical mathematics engine for Module 05:
  * Damping Mechanisms in the Force-Displacement Plane (Viscous, Coulomb, Structural)
  * and Exact Piecewise Coulomb Stick-Slip Free Decay.
  *

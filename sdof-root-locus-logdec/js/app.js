@@ -1,6 +1,6 @@
 /**
  * app.js
- * Main controller for Module 11 (sdof-root-locus-logdec):
+ * Main controller for Module 01 (sdof-root-locus-logdec):
  * Viscous Free-Response Root Locus and Logarithmic Decrement Identification.
  */
 (function () {
@@ -171,7 +171,7 @@
     const el = document.getElementById('code-snippet');
     if (!el) return;
     el.textContent =
-`% Module 11: Viscous Free-Response Root Locus & Logarithmic Decrement (Inman Ch. 1)
+`% Module 01: Viscous Free-Response Root Locus & Logarithmic Decrement (Inman Ch. 1)
 zeta = ${M.fmt(state.zeta, 3)};   wn = ${M.fmt(state.wn, 2)};
 s = roots([1, 2*zeta*wn, wn^2]);      % Exact characteristic poles
 fprintf('Poles: %.3f %+.3fi,  %.3f %+.3fi\\n', real(s(1)), imag(s(1)), real(s(2)), imag(s(2)));

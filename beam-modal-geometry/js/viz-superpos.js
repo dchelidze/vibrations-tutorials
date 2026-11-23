@@ -1,6 +1,6 @@
 /**
  * viz-superpos.js
- * Section 3 visualization for Module 06 (beam-modal-geometry):
+ * Section 3 visualization for Module 11 (beam-modal-geometry):
  * - Top canvas: Live animated N-mode superposition w(xi, t) = sum_{n=1}^N q_n(0) cos(w_n t) phi_n(xi)
  *               against the dashed initial shape w_0(xi), with interactive pluck point xi_0!
  * - Bottom canvas: Modal participation bar chart |q_n(0)| and modal energy share E_n / E_tot,

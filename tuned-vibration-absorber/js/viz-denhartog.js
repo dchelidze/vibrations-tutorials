@@ -1,6 +1,6 @@
 /**
  * viz-denhartog.js
- * Section 2 centerpiece visualization for Module 05 (tuned-vibration-absorber):
+ * Section 2 centerpiece visualization for Module 10 (tuned-vibration-absorber):
  * Den Hartog's Fixed-Point Theorem!
  * Plots a family of primary-mass FRF curves |X1(r)| / Xst across multiple damping ratios
  * (zetaA = 0, 0.08, zetaA_opt, 0.45, and zetaA -> infinity locked-mass curve) plus the

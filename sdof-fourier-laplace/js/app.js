@@ -1,6 +1,6 @@
 /**
  * app.js
- * Central reactive controller for Module 02 (Fourier & Laplace Transforms in Vibration Analysis).
+ * Central reactive controller for Module 07 (Fourier & Laplace Transforms in Vibration Analysis).
  * Coordinates KaTeX typesetting, physical parameter state, all five interactive visualizations,
  * live six-FRF dimensionality table, MATLAB/Python verification scripts, citation widget,
  * theme toggle, scroll-spy, and 60fps animation loop.

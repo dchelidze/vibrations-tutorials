@@ -1,6 +1,6 @@
 /**
  * math-sensors.js
- * Exact analytical mathematics engine for Module 09:
+ * Exact analytical mathematics engine for Module 04:
  * Base Excitation, Rotating Unbalance, and Seismic Sensor Regimes (Accelerometer vs. Vibrometer).
  *
  * Exact complex transfer functions (r = w / w_n):

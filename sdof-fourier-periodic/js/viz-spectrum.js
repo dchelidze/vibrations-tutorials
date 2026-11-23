@@ -1,6 +1,6 @@
 /**
  * viz-spectrum.js
- * Section 2 & 3 visualizations for Module 10 (sdof-fourier-periodic):
+ * Section 2 & 3 visualizations for Module 06 (sdof-fourier-periodic):
  * - Section 2 left canvas: Input harmonic spectrum c_n overlaid with SDOF FRF envelope |H(i r)|.
  * - Section 2 right canvas: Filtered output harmonic spectrum c_n |H(i n r_0)| highlighting dominant harmonic.
  * - Section 3 full-width canvas: Total RMS output X_rms(r_0) vs. fundamental ratio r_0 showing
